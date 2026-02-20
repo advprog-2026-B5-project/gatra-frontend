@@ -8,6 +8,12 @@ function App() {
   const [userData, setUserData] = useState([]); 
   const [loading, setLoading] = useState(false);
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setToken('');
+    setUserData([]);
+  };
+
   useEffect(() => {
     if (token) {
       setLoading(true);
@@ -38,12 +44,6 @@ function App() {
     } catch (err) {
       alert(err.message);
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setToken('');
-    setUserData([]);
   };
 
   if (!token) {
