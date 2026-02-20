@@ -15,17 +15,21 @@ function App() {
   };
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const data = await getAllUsers(token);
+        setUserData(data);
+      } catch (err) {
+        console.error("Gagal load data: ", err);
+        handleLogout();
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (token) {
-      setLoading(true);
-      getAllUsers(token)
-        .then(data => {
-          setUserData(data); 
-        })
-        .catch(err => {
-          console.error("Gagal load data: ", err);
-          handleLogout();
-        })
-        .finally(() => setLoading(false));
+      fetchData();
     }
   }, [token]);
 
