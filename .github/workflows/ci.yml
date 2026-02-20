@@ -1,0 +1,47 @@
+name: Continuous Integration (CI)
+
+on:
+  push:
+    branches: [ "main", "staging" ]
+  pull_request:
+    branches: [ "main", "staging" ]
+
+jobs:
+  # CI (Quality Check)
+  test:
+    name: Code Quality and Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Lint
+        # Mengecek aturan kode sesuai eslint.config.js (Internal Quality)
+        run: npm run lint --if-present
+
+      - name: Build Check
+        # Memastikan aplikasi bisa dibuild (Standard Kelulusan)
+        run: npm run build
+
+  # CD (Dummy Deployment)
+  deploy:
+    name: Dummy Deployment
+    needs: test # Guard: CD hanya jalan jika CI "hijau" (Syarat Rubrik)
+    if: github.event_name == 'push' # Mencegah deploy saat PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploying...
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "Deploying dummy frontend build to PRODUCTION environment..."
+          else
+            echo "Deploying dummy frontend build to STAGING environment..."
+          fi
