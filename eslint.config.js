@@ -24,9 +24,15 @@ export default defineConfig([
         sourceType: 'module',
       },
     },
+    settings: {
+      react: {
+        version: "detect",
+      },
+    },
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
-      'react/react-in-jsx-scope': 'off'
+      'react/react-in-jsx-scope': 'off',
+      'react/prop-types': 'off',
     },
   },
 ])
