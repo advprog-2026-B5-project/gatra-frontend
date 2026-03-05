@@ -1,31 +1,23 @@
-import { useState } from 'react'; 
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import LandingPage from './pages/LandingPage';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Profile from './pages/Profile';
+import OAuth2RedirectHandler from './OAuth2RedirectHandler.jsx';
 
 function App() {
-  const [token, setToken] = useState(localStorage.getItem('token') || '');
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userId');
-    setToken('');
-  };
-  
   return (
-    <div className="min-h-screen w-full bg-main text-white flex flex-col">
-      <Navbar onLogout={handleLogout} isLoggedIn={!!token} />
-      
+    <div className="min-h-screen w-full bg-main text-white flex flex-col overflow-x-hidden font-sans">
+      <Navbar />
+
       <main className="grow pb-20 overflow-y-auto">
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-
-          {/* <Route 
-            path="/login" 
-            element={!token ? <LoginPage /> : <Navigate to="/" />} 
-          />
-
-          <Route path="/register" element={<RegisterPage />} /> */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
         </Routes>
       </main>
     </div>
