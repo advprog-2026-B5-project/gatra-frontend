@@ -172,7 +172,7 @@ const LandingPage = () => {
 
         <img
           src={background}
-          className="absolute w-[700px] opacity-30 left-1/2 -translate-x-1/2 -top-10"
+          className="absolute w-175 opacity-30 left-1/2 -translate-x-1/2 -top-10"
           alt=""
         />
 
