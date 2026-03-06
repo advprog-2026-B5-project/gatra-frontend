@@ -21,7 +21,7 @@ const Profile = () => {
 
         const fetchProfile = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${userId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!response.ok) throw new Error('Sesi kedaluwarsa atau profil tidak ditemukan');
@@ -46,7 +46,7 @@ const Profile = () => {
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
