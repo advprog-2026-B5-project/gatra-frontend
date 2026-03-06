@@ -43,7 +43,7 @@ const AdminDashboard = () => {
     const fetchUsers = async () => {
         setIsLoadingUsers(true);
         try {
-            const res = await fetch('http://localhost:8080/api/users', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const data = await res.json();
@@ -55,7 +55,7 @@ const AdminDashboard = () => {
     const fetchArticles = async () => {
         setIsLoadingArticles(true);
         try {
-            const res = await fetch('http://localhost:8080/api/articles', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/articles`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const data = await res.json();
@@ -67,7 +67,7 @@ const AdminDashboard = () => {
     const fetchCategories = async () => {
         setIsLoadingCategories(true);
         try {
-            const res = await fetch('http://localhost:8080/api/categories', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/categories`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const data = await res.json();
@@ -79,7 +79,7 @@ const AdminDashboard = () => {
     const handleDeleteUser = async (id) => {
         if (!confirm('Yakin ingin menghapus user ini?')) return;
         try {
-            await fetch(`http://localhost:8080/api/users/${id}`, {
+            await fetch(`${import.meta.env.VITE_API_URL}/${id}`, {
                 method: 'DELETE',
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -90,7 +90,7 @@ const AdminDashboard = () => {
     const handleDeleteArticle = async (id) => {
         if (!confirm('Yakin ingin menghapus artikel ini?')) return;
         try {
-            await fetch(`http://localhost:8080/api/articles/${id}`, {
+            await fetch(`${import.meta.env.VITE_API_URL}/api/articles/${id}`, {
                 method: 'DELETE',
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -101,7 +101,7 @@ const AdminDashboard = () => {
     const handleDeleteCategory = async (id) => {
         if (!confirm('Yakin ingin menghapus kategori ini?')) return;
         try {
-            await fetch(`http://localhost:8080/api/categories/${id}`, {
+            await fetch(`${import.meta.env.VITE_API_URL}/api/categories/${id}`, {
                 method: 'DELETE',
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -115,7 +115,7 @@ const AdminDashboard = () => {
         setIsSubmitting(true);
         setFormError('');
         try {
-            const res = await fetch('http://localhost:8080/api/categories', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/categories`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ name: categoryForm.name }),
@@ -135,7 +135,7 @@ const AdminDashboard = () => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            const res = await fetch(`http://localhost:8080/api/categories/${editingCategory.id}`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/categories/${editingCategory.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ name: editCategoryForm.name }),
@@ -157,7 +157,7 @@ const AdminDashboard = () => {
         setFormError('');
         setFormSuccess('');
         try {
-            const res = await fetch('http://localhost:8080/api/articles', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/articles`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({
@@ -182,7 +182,7 @@ const AdminDashboard = () => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            const res = await fetch(`http://localhost:8080/api/articles/${editingArticle.id}`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/articles/${editingArticle.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({
