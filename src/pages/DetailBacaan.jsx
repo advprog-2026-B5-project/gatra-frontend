@@ -24,7 +24,7 @@ const DetailBacaan = () => {
     const fetchArticle = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch(`http://localhost:8080/api/articles/${id}`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/articles/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!res.ok) throw new Error("Artikel tidak ditemukan");

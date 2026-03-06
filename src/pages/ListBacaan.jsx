@@ -53,10 +53,10 @@ const ListBacaan = () => {
         setIsLoading(true);
         try {
             const [artRes, catRes] = await Promise.all([
-                fetch("http://localhost:8080/api/articles", {
+                fetch(`${import.meta.env.VITE_API_URL}/api/articles`, {
                     headers: { Authorization: `Bearer ${token}` },
                 }),
-                fetch("http://localhost:8080/api/categories", {
+                fetch(`${import.meta.env.VITE_API_URL}/api/categories`, {
                     headers: { Authorization: `Bearer ${token}` },
                 }),
             ]);
