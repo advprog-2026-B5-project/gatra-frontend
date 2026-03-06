@@ -45,7 +45,7 @@ const Navbar = () => {
             {/* Menu Tengah */}
             <div className="hidden md:flex gap-8 text-gray-300">
                 <Link to="/" className="font-sans hover:text-white transition">Beranda</Link>
-                <a href="#" className="hover:text-white transition">Fitur</a>
+                <Link to="/listBacaan" className="font-sans hover:text-white transition">Bacaan</Link>
                 <a href="#" className="hover:text-white transition">Tentang</a>
             </div>
 
