@@ -27,7 +27,12 @@ const Login = () => {
             const data = await response.json();
             localStorage.setItem('token', data.token);
             localStorage.setItem('userId', data.userId);
-            navigate('/profile');
+            localStorage.setItem('role', data.role);
+            if(data.role === 'ROLE_ADMIN'){
+                navigate('/admin/dashboard');
+            } else{
+                navigate('/profile');
+            }
         } catch (err) {
             setError(err.message);
         } finally {
