@@ -7,6 +7,7 @@ import Profile from './pages/Profile';
 import OAuth2RedirectHandler from './OAuth2RedirectHandler.jsx';
 import AdminDashboard from "./pages/AdminDashboard";
 import ListBacaan from "./pages/ListBacaan";
+import DetailBacaan from './pages/DetailBacaan';
 
 function App() {
   const location = useLocation();
@@ -25,6 +26,7 @@ function App() {
                 <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/listBacaan" element={<ListBacaan />} />
+                <Route path="/bacaan/:id" element={<DetailBacaan />} />
             </Routes>
           </main>
     </div>
