@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getAllAchievements, createAchievement, updateAchievement, deleteAchievement } from '../api/achievement';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -12,6 +13,8 @@ const AdminDashboard = () => {
     const [isLoadingUsers, setIsLoadingUsers] = useState(true);
     const [isLoadingArticles, setIsLoadingArticles] = useState(true);
     const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+    const [achievements, setAchievements] = useState([]);
+    const [isLoadingAchievements, setIsLoadingAchievements] = useState(true);
 
     // Category state
     const [showAddCategory, setShowAddCategory] = useState(false);
@@ -29,6 +32,12 @@ const AdminDashboard = () => {
     const [formSuccess, setFormSuccess] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Achievement state
+    const [showAddAchievement, setShowAddAchievement] = useState(false);
+    const [achievementForm, setAchievementForm] = useState({ name: '', category: '', milestoneThreshold: '', description: '', badgeUrl: '' });
+    const [editingAchievement, setEditingAchievement] = useState(null);
+    const [editAchievementForm, setEditAchievementForm] = useState({ name: '', category: '', milestoneThreshold: '', description: '', badgeUrl: '' });
+
     useEffect(() => {
         const role = localStorage.getItem('role');
         if (!token || role !== 'ROLE_ADMIN') navigate('/login');
@@ -38,6 +47,7 @@ const AdminDashboard = () => {
         fetchUsers();
         fetchArticles();
         fetchCategories();
+        fetchAchievements();
     }, []);
 
     const fetchUsers = async () => {
@@ -76,6 +86,15 @@ const AdminDashboard = () => {
         finally { setIsLoadingCategories(false); }
     };
 
+    const fetchAchievements = async () => {
+        setIsLoadingAchievements(true);
+        try {
+            const data = await getAllAchievements(token);
+            setAchievements(data);
+        } catch { console.error('Gagal fetch achievements'); }
+        finally { setIsLoadingAchievements(false); }
+    };
+
     const handleDeleteUser = async (id) => {
         if (!confirm('Yakin ingin menghapus user ini?')) return;
         try {
@@ -108,6 +127,69 @@ const AdminDashboard = () => {
             setCategories(categories.filter(c => c.id !== id));
             if (selectedCategory?.id === id) setSelectedCategory(null);
         } catch { alert('Gagal menghapus kategori'); }
+    };
+
+    const handleDeleteAchievement = async (id) => {
+        if (!confirm('Yakin ingin menghapus achievement ini?')) return;
+        try {
+            await deleteAchievement(token, id);
+            setAchievements(achievements.filter(a => a.id !== id));
+        } catch { alert('Gagal menghapus achievement'); }
+    };
+
+    const handleAddAchievement = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setFormError('');
+        setFormSuccess('');
+        try {
+            await createAchievement(token, {
+                name: achievementForm.name,
+                category: achievementForm.category || null,
+                milestoneThreshold: parseInt(achievementForm.milestoneThreshold),
+                description: achievementForm.description || null,
+                badgeUrl: achievementForm.badgeUrl || null,
+            });
+            setAchievementForm({ name: '', category: '', milestoneThreshold: '', description: '', badgeUrl: '' });
+            setFormSuccess('Achievement berhasil ditambahkan!');
+            setShowAddAchievement(false);
+            setTimeout(() => {
+                setFormSuccess('');
+            }, 3000);
+            fetchAchievements();
+        } catch (err) {
+            setFormError(err.message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleEditAchievement = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setFormError('');
+        setFormSuccess('');
+        try {
+            await updateAchievement(token, editingAchievement.id, {
+                name: editAchievementForm.name,
+                category: editAchievementForm.category || null,
+                milestoneThreshold: parseInt(editAchievementForm.milestoneThreshold),
+                description: editAchievementForm.description || null,
+                badgeUrl: editAchievementForm.badgeUrl || null,
+            });
+            setEditingAchievement(null);
+            setEditAchievementForm({ name: '', category: '', milestoneThreshold: '', description: '', badgeUrl: '' });
+            setFormSuccess('Achievement berhasil diubah!');
+            setTimeout(() => {
+                setFormSuccess('');
+                setEditingAchievement(null);
+            }, 3000);
+            fetchAchievements();
+        } catch (err) {
+            setFormError(err.message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleAddCategory = async (e) => {
@@ -226,7 +308,7 @@ const AdminDashboard = () => {
 
             <div className="max-w-6xl mx-auto px-6 py-8">
                 {/* Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                     <div className="bg-[#131627] rounded-2xl p-5 border border-gray-800">
                         <p className="text-xs text-gray-500 mb-1">Total Peserta</p>
                         <p className="text-3xl font-bold">{users.length}</p>
@@ -239,17 +321,21 @@ const AdminDashboard = () => {
                         <p className="text-xs text-gray-500 mb-1">Kategori</p>
                         <p className="text-3xl font-bold">{categories.length}</p>
                     </div>
+                    <div className="bg-[#131627] rounded-2xl p-5 border border-gray-800">
+                        <p className="text-xs text-gray-500 mb-1">Achievement</p>
+                        <p className="text-3xl font-bold">{achievements.length}</p>
+                    </div>
                 </div>
 
                 {/* Tabs */}
                 <div className="flex gap-2 mb-6">
-                    {['users', 'categories'].map(tab => (
+                    {['users', 'categories', 'achievements'].map(tab => (
                         <button
                             key={tab}
-                            onClick={() => { setActiveTab(tab); setSelectedCategory(null); setShowAddArticle(false); setShowAddCategory(false); setFormError(''); setEditingCategory(null); setEditingArticle(null); }}
+                            onClick={() => { setActiveTab(tab); setSelectedCategory(null); setShowAddArticle(false); setShowAddCategory(false); setShowAddAchievement(false); setFormError(''); setFormSuccess(''); setEditingCategory(null); setEditingArticle(null); setEditingAchievement(null); }}
                             className={`px-5 py-2 rounded-xl text-sm font-medium transition ${activeTab === tab ? 'bg-blue-600 text-white' : 'bg-[#131627] text-gray-400 hover:text-white border border-gray-800'}`}
                         >
-                            {tab === 'users' ? 'Peserta' : 'Kategori & Bacaan'}
+                            {tab === 'users' ? 'Peserta' : tab === 'categories' ? 'Kategori & Bacaan' : 'Achievement'}
                         </button>
                     ))}
                 </div>
@@ -517,6 +603,232 @@ const AdminDashboard = () => {
                                             </div>
                                         </div>
                                     ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {formSuccess && <div className="bg-green-500/20 border border-green-500/50 text-green-200 p-3 rounded-xl mb-4 text-xs">{formSuccess}</div>}
+                {/* Achievements */}
+                {activeTab === 'achievements' && (
+                    <div>
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="font-semibold text-sm text-gray-300">Daftar Achievement</h2>
+                            <button
+                                onClick={() => { setShowAddAchievement(!showAddAchievement); setFormError(''); setFormSuccess(''); setEditingAchievement(null); }}
+                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded-xl transition font-medium"
+                            >
+                                {showAddAchievement ? 'Batal' : '+ Tambah Achievement'}
+                            </button>
+                        </div>
+
+                        {/* Add achievement form */}
+                        {showAddAchievement && (
+                            <div className="bg-[#131627] rounded-2xl border border-gray-800 p-6 mb-6">
+                                <h3 className="font-semibold text-sm mb-4">Tambah Achievement Baru</h3>
+                                {formError && <div className="bg-red-500/20 border border-red-500/50 text-red-200 p-3 rounded-xl mb-4 text-xs">{formError}</div>}
+                                <form onSubmit={handleAddAchievement} className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs text-gray-400 mb-1.5 ml-1">Nama Achievement *</label>
+                                            <input
+                                                type="text" required placeholder="Nama achievement"
+                                                value={achievementForm.name}
+                                                onChange={(e) => setAchievementForm({ ...achievementForm, name: e.target.value })}
+                                                className="w-full bg-[#1E2235] border border-transparent focus:border-blue-500 rounded-xl p-3 text-sm outline-none text-white placeholder-gray-500 transition"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-gray-400 mb-1.5 ml-1">Kategori</label>
+                                            <input
+                                                type="text" placeholder="Kategori (opsional)"
+                                                value={achievementForm.category}
+                                                onChange={(e) => setAchievementForm({ ...achievementForm, category: e.target.value })}
+                                                className="w-full bg-[#1E2235] border border-transparent focus:border-blue-500 rounded-xl p-3 text-sm outline-none text-white placeholder-gray-500 transition"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs text-gray-400 mb-1.5 ml-1">Milestone Threshold *</label>
+                                            <input
+                                                type="number" required min="1" placeholder="Minimal 1"
+                                                value={achievementForm.milestoneThreshold}
+                                                onChange={(e) => setAchievementForm({ ...achievementForm, milestoneThreshold: e.target.value })}
+                                                className="w-full bg-[#1E2235] border border-transparent focus:border-blue-500 rounded-xl p-3 text-sm outline-none text-white placeholder-gray-500 transition"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-gray-400 mb-1.5 ml-1">Badge URL</label>
+                                            <input
+                                                type="url" placeholder="URL gambar badge (opsional)"
+                                                value={achievementForm.badgeUrl}
+                                                onChange={(e) => setAchievementForm({ ...achievementForm, badgeUrl: e.target.value })}
+                                                className="w-full bg-[#1E2235] border border-transparent focus:border-blue-500 rounded-xl p-3 text-sm outline-none text-white placeholder-gray-500 transition"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-gray-400 mb-1.5 ml-1">Deskripsi</label>
+                                        <textarea
+                                            placeholder="Deskripsi achievement (opsional)" rows={3}
+                                            value={achievementForm.description}
+                                            onChange={(e) => setAchievementForm({ ...achievementForm, description: e.target.value })}
+                                            className="w-full bg-[#1E2235] border border-transparent focus:border-blue-500 rounded-xl p-3 text-sm outline-none text-white placeholder-gray-500 transition resize-none"
+                                        />
+                                    </div>
+                                    <button type="submit" disabled={isSubmitting}
+                                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition disabled:opacity-50">
+                                        {isSubmitting ? 'Menyimpan...' : 'Simpan Achievement'}
+                                    </button>
+                                </form>
+                            </div>
+                        )}
+
+                        {/* Edit achievement form */}
+                        {editingAchievement && (
+                            <div className="bg-[#131627] rounded-2xl border border-yellow-500/30 p-6 mb-6">
+                                {formError && <div className="bg-red-500/20 border border-red-500/50 text-red-200 p-3 rounded-xl mb-4 text-xs">{formError}</div>}
+                                <h3 className="font-semibold text-sm mb-4 text-yellow-400">Edit Achievement</h3>
+                                <form onSubmit={handleEditAchievement} className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs text-gray-400 mb-1.5 ml-1">Nama Achievement *</label>
+                                            <input
+                                                type="text" required
+                                                value={editAchievementForm.name}
+                                                onChange={(e) => setEditAchievementForm({ ...editAchievementForm, name: e.target.value })}
+                                                className="w-full bg-[#1E2235] border border-yellow-500/30 focus:border-yellow-500 rounded-xl p-3 text-sm outline-none text-white transition"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-gray-400 mb-1.5 ml-1">Kategori</label>
+                                            <input
+                                                type="text"
+                                                value={editAchievementForm.category}
+                                                onChange={(e) => setEditAchievementForm({ ...editAchievementForm, category: e.target.value })}
+                                                className="w-full bg-[#1E2235] border border-yellow-500/30 focus:border-yellow-500 rounded-xl p-3 text-sm outline-none text-white transition"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs text-gray-400 mb-1.5 ml-1">Milestone Threshold *</label>
+                                            <input
+                                                type="number" required min="1"
+                                                value={editAchievementForm.milestoneThreshold}
+                                                onChange={(e) => setEditAchievementForm({ ...editAchievementForm, milestoneThreshold: e.target.value })}
+                                                className="w-full bg-[#1E2235] border border-yellow-500/30 focus:border-yellow-500 rounded-xl p-3 text-sm outline-none text-white transition"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-gray-400 mb-1.5 ml-1">Badge URL</label>
+                                            <input
+                                                type="url"
+                                                value={editAchievementForm.badgeUrl}
+                                                onChange={(e) => setEditAchievementForm({ ...editAchievementForm, badgeUrl: e.target.value })}
+                                                className="w-full bg-[#1E2235] border border-yellow-500/30 focus:border-yellow-500 rounded-xl p-3 text-sm outline-none text-white transition"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-gray-400 mb-1.5 ml-1">Deskripsi</label>
+                                        <textarea
+                                            rows={3}
+                                            value={editAchievementForm.description}
+                                            onChange={(e) => setEditAchievementForm({ ...editAchievementForm, description: e.target.value })}
+                                            className="w-full bg-[#1E2235] border border-yellow-500/30 focus:border-yellow-500 rounded-xl p-3 text-sm outline-none text-white transition resize-none"
+                                        />
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <button type="submit" disabled={isSubmitting}
+                                                className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2.5 rounded-xl text-sm font-medium transition disabled:opacity-50">
+                                            {isSubmitting ? 'Menyimpan...' : 'Update Achievement'}
+                                        </button>
+                                        <button type="button" onClick={() => setEditingAchievement(null)}
+                                                className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2.5 rounded-xl text-sm transition">
+                                            Batal
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        )}
+
+                        {/* Achievements list */}
+                        <div className="bg-[#131627] rounded-2xl border border-gray-800 overflow-hidden">
+                            <div className="px-6 py-4 border-b border-gray-800">
+                                <h2 className="font-semibold text-sm">Daftar Achievement</h2>
+                            </div>
+                            {isLoadingAchievements ? (
+                                <div className="p-8 text-center text-gray-500 text-sm">Memuat data...</div>
+                            ) : achievements.length === 0 ? (
+                                <div className="p-8 text-center text-gray-500 text-sm">Belum ada achievement.</div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm">
+                                        <thead>
+                                        <tr className="text-xs text-gray-500 border-b border-gray-800">
+                                            <th className="text-left px-6 py-3 font-medium">Nama</th>
+                                            <th className="text-left px-6 py-3 font-medium">Kategori</th>
+                                            <th className="text-left px-6 py-3 font-medium">Milestone</th>
+                                            <th className="text-left px-6 py-3 font-medium">Deskripsi</th>
+                                            <th className="text-left px-6 py-3 font-medium">Badge</th>
+                                            <th className="px-6 py-3"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {achievements.map((ach, i) => (
+                                            <tr key={ach.id || i} className="border-b border-gray-800/50 hover:bg-white/5 transition">
+                                                <td className="px-6 py-4 font-medium">{ach.name}</td>
+                                                <td className="px-6 py-4 text-gray-300">
+                                                    {ach.category ? (
+                                                        <span className="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-300">{ach.category}</span>
+                                                    ) : (
+                                                        <span className="text-gray-600">-</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className="text-xs px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-mono">{ach.milestoneThreshold}</span>
+                                                </td>
+                                                <td className="px-6 py-4 text-gray-400 max-w-xs truncate">{ach.description || '-'}</td>
+                                                <td className="px-6 py-4">
+                                                    {ach.badgeUrl ? (
+                                                        <img src={ach.badgeUrl} alt="badge" className="w-8 h-8 rounded-lg object-cover border border-gray-700" />
+                                                    ) : (
+                                                        <span className="text-gray-600">-</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex gap-3 justify-end">
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditingAchievement(ach);
+                                                                setEditAchievementForm({
+                                                                    name: ach.name,
+                                                                    category: ach.category || '',
+                                                                    milestoneThreshold: ach.milestoneThreshold,
+                                                                    description: ach.description || '',
+                                                                    badgeUrl: ach.badgeUrl || '',
+                                                                });
+                                                                setShowAddAchievement(false);
+                                                            }}
+                                                            className="text-xs text-yellow-400 hover:text-yellow-300 transition"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteAchievement(ach.id)}
+                                                            className="text-xs text-red-400 hover:text-red-300 transition"
+                                                        >
+                                                            Hapus
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </table>
                                 </div>
                             )}
                         </div>
