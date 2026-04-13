@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllAchievements, createAchievement, updateAchievement, deleteAchievement } from '../api/achievement';
+import DailyMissionManager from '../components/DailyMissionManager';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -329,13 +330,14 @@ const AdminDashboard = () => {
 
                 {/* Tabs */}
                 <div className="flex gap-2 mb-6">
-                    {['users', 'categories', 'achievements'].map(tab => (
+                    {/* Tambahkan tab 'missions' di dalam array */}
+                    {['users', 'categories', 'achievements', 'missions'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => { setActiveTab(tab); setSelectedCategory(null); setShowAddArticle(false); setShowAddCategory(false); setShowAddAchievement(false); setFormError(''); setFormSuccess(''); setEditingCategory(null); setEditingArticle(null); setEditingAchievement(null); }}
                             className={`px-5 py-2 rounded-xl text-sm font-medium transition ${activeTab === tab ? 'bg-blue-600 text-white' : 'bg-[#131627] text-gray-400 hover:text-white border border-gray-800'}`}
                         >
-                            {tab === 'users' ? 'Peserta' : tab === 'categories' ? 'Kategori & Bacaan' : 'Achievement'}
+                            {tab === 'users' ? 'Peserta' : tab === 'categories' ? 'Kategori & Bacaan' : tab === 'achievements' ? 'Achievement' : 'Daily Mission'}
                         </button>
                     ))}
                 </div>
@@ -834,6 +836,12 @@ const AdminDashboard = () => {
                         </div>
                     </div>
                 )}
+
+                {/* Daily Mission Tab */}
+                {activeTab === 'missions' && (
+                    <DailyMissionManager />
+                )}
+
             </div>
         </div>
     );
