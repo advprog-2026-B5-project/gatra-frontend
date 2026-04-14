@@ -36,7 +36,7 @@ const AdminDashboard = () => {
     const [expandedQuizArticleId, setExpandedQuizArticleId] = useState(null);
     const [quizQuestions, setQuizQuestions] = useState({});
     const [showAddQuestion, setShowAddQuestion] = useState(false);
-    const [questionForm, setQuestionForm] = useState({ text: '', options: ['', '', '', ''], correctAnswer: '' });
+    const [questionForm, setQuestionForm] = useState({ text: '', options: ['', '', '', ''], correctAnswer: '' ,type: 'MULTIPLE_CHOICE'});
     const [editingQuestion, setEditingQuestion] = useState(null);
     const [editQuestionForm, setEditQuestionForm] = useState({ text: '', options: ['', '', '', ''], correctAnswer: '' });
     const [passingScoreForm, setPassingScoreForm] = useState('');
@@ -207,14 +207,22 @@ const AdminDashboard = () => {
 
     const handleAddQuestion = async (articleId) => {
         setQuizError('');
-        if (!questionForm.text || questionForm.options.some(o => !o) || !questionForm.correctAnswer) {
+
+        const isMultipleChoice = questionForm.type === 'MULTIPLE_CHOICE';
+
+        if (!questionForm.text || !questionForm.correctAnswer) {
             setQuizError('Semua field wajib diisi.');
             return;
         }
-        if (!questionForm.options.includes(questionForm.correctAnswer)) {
+        if (isMultipleChoice && questionForm.options.some(o => !o)) {
+            setQuizError('Semua pilihan jawaban wajib diisi.');
+            return;
+        }
+        if (isMultipleChoice && !questionForm.options.includes(questionForm.correctAnswer)) {
             setQuizError('Jawaban benar harus salah satu dari pilihan.');
             return;
         }
+
         try {
             const res = await fetch(`${API}/api/quiz`, {
                 method: 'POST',
@@ -222,7 +230,7 @@ const AdminDashboard = () => {
                 body: JSON.stringify({ ...questionForm, articleId }),
             });
             if (!res.ok) throw new Error('Gagal menambah pertanyaan');
-            setQuestionForm({ text: '', options: ['', '', '', ''], correctAnswer: '' });
+            setQuestionForm({ text: '', options: ['', '', '', ''], correctAnswer: '', type: 'MULTIPLE_CHOICE' }); // ✅ reset + type
             setShowAddQuestion(false);
             setQuizSuccess('Pertanyaan berhasil ditambahkan!');
             fetchQuestions(articleId);
@@ -599,6 +607,26 @@ const AdminDashboard = () => {
                                                     {showAddQuestion && (
                                                         <div className="bg-[#131627] rounded-xl border border-purple-500/20 p-4 mb-4">
                                                             <div className="flex flex-col gap-3">
+
+                                                                {/* Dropdown Tipe */}
+                                                                <div>
+                                                                    <label className="text-xs text-gray-400 mb-1 block">Tipe Soal</label>
+                                                                    <select
+                                                                        value={questionForm.type}
+                                                                        onChange={e => setQuestionForm({
+                                                                            ...questionForm,
+                                                                            type: e.target.value,
+                                                                            options: e.target.value === 'MULTIPLE_CHOICE' ? ['', '', '', ''] : ['True', 'False'],
+                                                                            correctAnswer: ''
+                                                                        })}
+                                                                        className="w-full bg-[#1E2235] border border-gray-700 focus:border-purple-500 rounded-lg px-3 py-2 text-sm outline-none text-white transition"
+                                                                    >
+                                                                        <option value="MULTIPLE_CHOICE">Multiple Choice</option>
+                                                                        <option value="TRUE_FALSE">True / False</option>
+                                                                    </select>
+                                                                </div>
+
+                                                                {/* Pertanyaan */}
                                                                 <div>
                                                                     <label className="text-xs text-gray-400 mb-1 block">Pertanyaan</label>
                                                                     <textarea rows={2} placeholder="Tulis pertanyaan..."
@@ -607,33 +635,41 @@ const AdminDashboard = () => {
                                                                               className="w-full bg-[#1E2235] border border-gray-700 focus:border-purple-500 rounded-lg px-3 py-2 text-sm outline-none text-white resize-none transition"
                                                                     />
                                                                 </div>
-                                                                <div>
-                                                                    <label className="text-xs text-gray-400 mb-1 block">Pilihan Jawaban</label>
-                                                                    <div className="grid grid-cols-2 gap-2">
-                                                                        {questionForm.options.map((opt, idx) => (
-                                                                            <input key={idx} type="text" placeholder={`Pilihan ${String.fromCharCode(65 + idx)}`}
-                                                                                   value={opt}
-                                                                                   onChange={e => {
-                                                                                       const updated = [...questionForm.options];
-                                                                                       updated[idx] = e.target.value;
-                                                                                       setQuestionForm({ ...questionForm, options: updated });
-                                                                                   }}
-                                                                                   className="bg-[#1E2235] border border-gray-700 focus:border-purple-500 rounded-lg px-3 py-2 text-sm outline-none text-white transition"
-                                                                            />
-                                                                        ))}
+
+                                                                {/* Pilihan Jawaban — hanya tampil kalau Multiple Choice */}
+                                                                {questionForm.type === 'MULTIPLE_CHOICE' && (
+                                                                    <div>
+                                                                        <label className="text-xs text-gray-400 mb-1 block">Pilihan Jawaban</label>
+                                                                        <div className="grid grid-cols-2 gap-2">
+                                                                            {questionForm.options.map((opt, idx) => (
+                                                                                <input key={idx} type="text" placeholder={`Pilihan ${String.fromCharCode(65 + idx)}`}
+                                                                                       value={opt}
+                                                                                       onChange={e => {
+                                                                                           const updated = [...questionForm.options];
+                                                                                           updated[idx] = e.target.value;
+                                                                                           setQuestionForm({ ...questionForm, options: updated });
+                                                                                       }}
+                                                                                       className="bg-[#1E2235] border border-gray-700 focus:border-purple-500 rounded-lg px-3 py-2 text-sm outline-none text-white transition"
+                                                                                />
+                                                                            ))}
+                                                                        </div>
                                                                     </div>
-                                                                </div>
+                                                                )}
+
+                                                                {/* Jawaban Benar */}
                                                                 <div>
                                                                     <label className="text-xs text-gray-400 mb-1 block">Jawaban Benar</label>
                                                                     <select value={questionForm.correctAnswer}
                                                                             onChange={e => setQuestionForm({ ...questionForm, correctAnswer: e.target.value })}
-                                                                            className="w-full bg-[#1E2235] border border-gray-700 focus:border-purple-500 rounded-lg px-3 py-2 text-sm outline-none text-white transition">
+                                                                            className="w-full bg-[#1E2235] border border-gray-700 focus:border-purple-500 rounded-lg px-3 py-2 text-sm outline-none text-white transition"
+                                                                    >
                                                                         <option value="">-- Pilih jawaban benar --</option>
                                                                         {questionForm.options.filter(o => o).map((opt, idx) => (
                                                                             <option key={idx} value={opt}>{opt}</option>
                                                                         ))}
                                                                     </select>
                                                                 </div>
+
                                                                 <button onClick={() => handleAddQuestion(article.id)}
                                                                         className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg text-sm font-medium transition">
                                                                     Simpan Pertanyaan
@@ -702,11 +738,28 @@ const AdminDashboard = () => {
                                                                             {q.text}
                                                                         </p>
                                                                         <div className="flex flex-wrap gap-2">
-                                                                            {q.options?.map((opt, oi) => (
-                                                                                <span key={oi} className={`text-xs px-2 py-1 rounded-full border ${opt === q.correctAnswer ? 'border-green-500 text-green-400 bg-green-500/10' : 'border-gray-700 text-gray-400'}`}>
-                                                                                    {opt === q.correctAnswer && '✓ '}{opt}
-                                                                                </span>
-                                                                            ))}
+                                                                            {q.options && q.options.length > 0 ? (
+                                                                                // Multiple Choice — tampilkan semua options
+                                                                                q.options.map((opt, oi) => (
+                                                                                    <span key={oi} className={`text-xs px-2 py-1 rounded-full border ${
+                                                                                        opt === q.correctAnswer
+                                                                                            ? 'border-green-500 text-green-400 bg-green-500/10'
+                                                                                            : 'border-gray-700 text-gray-400'
+                                                                                    }`}>
+                                                                                        {opt === q.correctAnswer && '✓ '}{opt}
+                                                                                    </span>
+                                                                                ))
+                                                                                ) : (
+                                                                                ['True', 'False'].map((opt, oi) => (
+                                                                                    <span key={oi} className={`text-xs px-2 py-1 rounded-full border ${
+                                                                                        opt === q.correctAnswer
+                                                                                            ? 'border-green-500 text-green-400 bg-green-500/10'
+                                                                                            : 'border-gray-700 text-gray-400'
+                                                                                    }`}>
+                                                                                        {opt.toLowerCase() === q.correctAnswer?.toLowerCase() && '✓ '}{opt}
+                                                                                    </span>
+                                                                                ))
+                                                                                )}
                                                                         </div>
                                                                     </div>
                                                                     <div className="flex gap-2 shrink-0">

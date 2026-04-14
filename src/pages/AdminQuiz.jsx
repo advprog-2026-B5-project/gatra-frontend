@@ -12,6 +12,7 @@ const AdminQuiz = () => {
         text: "",
         options: ["", "", "", ""],
         correctAnswer: "",
+        type: "MULTIPLE_CHOICE",
     });
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
