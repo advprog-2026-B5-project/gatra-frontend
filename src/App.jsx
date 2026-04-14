@@ -9,6 +9,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ListBacaan from "./pages/ListBacaan";
 import DetailBacaan from './pages/DetailBacaan';
 import AdminQuiz from "./pages/AdminQuiz";
+import QuizPage from "./pages/QuizPage";
 
 function App() {
     const location = useLocation();
@@ -28,6 +29,7 @@ function App() {
                     <Route path="/listBacaan" element={<ListBacaan />} />
                     <Route path="/bacaan/:id" element={<DetailBacaan />} />
                     <Route path="/admin/quiz" element={<AdminQuiz />} />
+                    <Route path="/quiz/:id" element={<QuizPage />} />
                 </Routes>
             </main>
         </div>
