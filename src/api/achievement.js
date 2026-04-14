@@ -55,3 +55,27 @@ export const deleteAchievement = async (token, id) => {
     });
     if (!response.ok) throw new Error("Gagal hapus achievement");
 };
+
+export const getMyAchievements = async (token) => {
+    const response = await fetch(`${API_URL}/api/achievements/me`, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+    if (!response.ok) throw new Error('Gagal memuat pencapaianmu');
+    return response.json();
+};
+
+export const toggleAchievementDisplay = async (token, achievementId, isDisplayed) => {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/achievements/display/${achievementId}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ isDisplayed })
+    });
+    if (!response.ok) throw new Error('Gagal memperbarui status tampilan');
+    return response.json();
+};
