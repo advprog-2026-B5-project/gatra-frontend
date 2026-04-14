@@ -52,7 +52,7 @@ const AchievementInventory = () => {
 
                                 {/* Tombol Toggle Display di Pojok Kanan Atas */}
                                 <button
-                                    onClick={() => handleToggleDisplay(ach.id, !ach.isDisplayed)}
+                                    // onClick={() => handleToggleDisplay(ach.id, !ach.isDisplayed)}
                                     className={`absolute top-4 right-4 p-1.5 rounded-lg transition-all ${
                                         ach.isDisplayed ? 'text-yellow-400 bg-yellow-400/10' : 'text-gray-600 hover:text-gray-400'
                                     }`}
