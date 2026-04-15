@@ -38,7 +38,7 @@ const AdminDashboard = () => {
     const [showAddQuestion, setShowAddQuestion] = useState(false);
     const [questionForm, setQuestionForm] = useState({ text: '', options: ['', '', '', ''], correctAnswer: '' ,type: 'MULTIPLE_CHOICE'});
     const [editingQuestion, setEditingQuestion] = useState(null);
-    const [editQuestionForm, setEditQuestionForm] = useState({ text: '', options: ['', '', '', ''], correctAnswer: '' });
+    const [editQuestionForm, setEditQuestionForm] = useState({ text: '', type: 'MULTIPLE_CHOICE', options: ['', '', '', ''], correctAnswer: '' });
     const [passingScoreForm, setPassingScoreForm] = useState('');
     const [quizError, setQuizError] = useState('');
     const [quizSuccess, setQuizSuccess] = useState('');
@@ -683,24 +683,29 @@ const AdminDashboard = () => {
                                                         <div className="bg-[#131627] rounded-xl border border-yellow-500/30 p-4 mb-4">
                                                             <p className="text-xs text-yellow-400 font-semibold mb-3">Edit Pertanyaan</p>
                                                             <div className="flex flex-col gap-3">
-                                                                <textarea rows={2}
-                                                                          value={editQuestionForm.text}
-                                                                          onChange={e => setEditQuestionForm({ ...editQuestionForm, text: e.target.value })}
-                                                                          className="w-full bg-[#1E2235] border border-yellow-500/30 focus:border-yellow-500 rounded-lg px-3 py-2 text-sm outline-none text-white resize-none transition"
-                                                                />
-                                                                <div className="grid grid-cols-2 gap-2">
-                                                                    {editQuestionForm.options.map((opt, idx) => (
-                                                                        <input key={idx} type="text" placeholder={`Pilihan ${String.fromCharCode(65 + idx)}`}
-                                                                               value={opt}
-                                                                               onChange={e => {
-                                                                                   const updated = [...editQuestionForm.options];
-                                                                                   updated[idx] = e.target.value;
-                                                                                   setEditQuestionForm({ ...editQuestionForm, options: updated });
-                                                                               }}
-                                                                               className="bg-[#1E2235] border border-yellow-500/30 focus:border-yellow-500 rounded-lg px-3 py-2 text-sm outline-none text-white transition"
-                                                                        />
-                                                                    ))}
-                                                                </div>
+    <textarea rows={2}
+              value={editQuestionForm.text}
+              onChange={e => setEditQuestionForm({ ...editQuestionForm, text: e.target.value })}
+              className="w-full bg-[#1E2235] border border-yellow-500/30 focus:border-yellow-500 rounded-lg px-3 py-2 text-sm outline-none text-white resize-none transition"
+    />
+
+                                                                {/* Hanya tampil kalau Multiple Choice */}
+                                                                {editQuestionForm.type === 'MULTIPLE_CHOICE' && (
+                                                                    <div className="grid grid-cols-2 gap-2">
+                                                                        {editQuestionForm.options.map((opt, idx) => (
+                                                                            <input key={idx} type="text" placeholder={`Pilihan ${String.fromCharCode(65 + idx)}`}
+                                                                                   value={opt}
+                                                                                   onChange={e => {
+                                                                                       const updated = [...editQuestionForm.options];
+                                                                                       updated[idx] = e.target.value;
+                                                                                       setEditQuestionForm({ ...editQuestionForm, options: updated });
+                                                                                   }}
+                                                                                   className="bg-[#1E2235] border border-yellow-500/30 focus:border-yellow-500 rounded-lg px-3 py-2 text-sm outline-none text-white transition"
+                                                                            />
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+
                                                                 <select value={editQuestionForm.correctAnswer}
                                                                         onChange={e => setEditQuestionForm({ ...editQuestionForm, correctAnswer: e.target.value })}
                                                                         className="w-full bg-[#1E2235] border border-yellow-500/30 focus:border-yellow-500 rounded-lg px-3 py-2 text-sm outline-none text-white transition">
@@ -709,6 +714,7 @@ const AdminDashboard = () => {
                                                                         <option key={idx} value={opt}>{opt}</option>
                                                                     ))}
                                                                 </select>
+
                                                                 <div className="flex gap-2">
                                                                     <button onClick={() => handleEditQuestion(article.id)}
                                                                             className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black py-2 rounded-lg text-sm font-medium transition">
@@ -764,7 +770,17 @@ const AdminDashboard = () => {
                                                                     </div>
                                                                     <div className="flex gap-2 shrink-0">
                                                                         <button
-                                                                            onClick={() => { setEditingQuestion(q); setEditQuestionForm({ text: q.text, options: q.options, correctAnswer: q.correctAnswer }); setShowAddQuestion(false); }}
+                                                                            onClick={() => {
+                                                                                setEditingQuestion(q);
+                                                                                const isTF = !q.options || q.options.length === 0;
+                                                                                setEditQuestionForm({
+                                                                                    text: q.text,
+                                                                                    type: isTF ? 'TRUE_FALSE' : 'MULTIPLE_CHOICE',
+                                                                                    options: isTF ? ['True', 'False'] : q.options,
+                                                                                    correctAnswer: q.correctAnswer
+                                                                                });
+                                                                                setShowAddQuestion(false);
+                                                                            }}
                                                                             className="text-xs text-yellow-400 hover:text-yellow-300 transition">
                                                                             Edit
                                                                         </button>
