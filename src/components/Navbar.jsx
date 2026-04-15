@@ -147,6 +147,16 @@ const Navbar = () => {
                                     </Link>
                                 )}
 
+                                {role !== 'ROLE_ADMIN' && (
+                                    <Link
+                                        to="/missions"
+                                        onClick={() => setIsDropdownOpen(false)}
+                                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-[#1E2235] hover:text-white transition"
+                                    >
+                                        <span>Misi Harian</span>
+                                    </Link>
+                                )}
+
                                 <div className="border-t border-gray-800/80 my-1"></div>
 
                                 {/* Opsi Logout */}
