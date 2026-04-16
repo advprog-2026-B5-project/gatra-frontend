@@ -152,7 +152,10 @@ const QuizPage = () => {
 
         return (
             <>
-                <MilestoneNotification unlockedAchievements={result.milestoneResponse?.newlyUnlockedAchievements || []} />
+                <MilestoneNotification 
+                    unlockedAchievements={result.milestoneResponse?.newlyUnlockedAchievements || []} 
+                    completedMissions={result.milestoneResponse?.completedMissions || []}
+                />
                 <div className="min-h-screen bg-[#0B0F1E] flex items-center justify-center px-6 py-16">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: 24 }}

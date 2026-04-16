@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { markArticleAsRead } from "../api/article";
@@ -19,8 +19,11 @@ const DetailBacaan = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [unlockedAchievements, setUnlockedAchievements] = useState([]);
+    const [completedMissions, setCompletedMissions] = useState([]);
+    const markedAsReadRef = useRef(null);
 
     useEffect(() => {
+        markedAsReadRef.current = null;
         fetchArticle();
     }, [id]);
 
@@ -34,14 +37,20 @@ const DetailBacaan = () => {
             const data = await res.json();
             setArticle(data);
 
-            // Tandai artikel sudah dibaca
-            try {
-                const milestoneData = await markArticleAsRead(token, id);
-                if (milestoneData?.newlyUnlockedAchievements?.length > 0) {
-                    setUnlockedAchievements(milestoneData.newlyUnlockedAchievements);
+            if (markedAsReadRef.current !== id) {
+                markedAsReadRef.current = id;
+                try {
+                    const milestoneData = await markArticleAsRead(token, id);
+                    if (milestoneData?.newlyUnlockedAchievements?.length > 0) {
+                        setUnlockedAchievements(milestoneData.newlyUnlockedAchievements);
+                    }
+                    if (milestoneData?.completedMissions?.length > 0) {
+                        setCompletedMissions(milestoneData.completedMissions);
+                    }
+                } catch (err) {
+                    console.error("Gagal menandai artikel sebagai dibaca:", err);
+                    markedAsReadRef.current = null;
                 }
-            } catch (err) {
-                console.error("Gagal menandai artikel sebagai dibaca:", err);
             }
         } catch (err) {
             setError(err.message);
@@ -80,7 +89,7 @@ const DetailBacaan = () => {
 
     return (
         <>
-            <MilestoneNotification unlockedAchievements={unlockedAchievements} />
+            <MilestoneNotification unlockedAchievements={unlockedAchievements} completedMissions={completedMissions} />
             <div className="min-h-screen px-6 md:px-10 py-16 max-w-3xl mx-auto w-full">
                 <motion.button
                     initial={{ opacity: 0, x: -10 }}
