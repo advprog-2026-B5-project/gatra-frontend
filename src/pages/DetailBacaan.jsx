@@ -67,8 +67,6 @@ const DetailBacaan = () => {
 
     return (
         <div className="min-h-screen px-6 md:px-10 py-16 max-w-3xl mx-auto w-full">
-
-            {/* Back button */}
             <motion.button
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -82,10 +80,7 @@ const DetailBacaan = () => {
                 Daftar Bacaan
             </motion.button>
 
-            {/* Article */}
             <motion.article {...fadeUp} className="flex flex-col gap-6">
-
-                {/* Category badge */}
                 <div>
                     <span
                         className="inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full"
@@ -94,20 +89,19 @@ const DetailBacaan = () => {
                         {article.categoryName}
                     </span>
                 </div>
-
-                {/* Title */}
                 <h1 className="font-display text-2xl md:text-3xl lg:text-4xl font-bold leading-snug">
                     {article.title}
                 </h1>
-
-                {/* Divider */}
                 <div className="border-t border-white/10" />
-
-                {/* Content */}
                 <div className="text-gray-300 text-base bg-[#111A3B] rounded-2xl p-6 md:p-8 leading-relaxed whitespace-pre-wrap">
                     {article.content}
                 </div>
-
+                <button
+                    onClick={() => navigate(`/quiz/${id}`)}
+                    className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition"
+                >
+                    Mulai Quiz
+                </button>
             </motion.article>
         </div>
     );
