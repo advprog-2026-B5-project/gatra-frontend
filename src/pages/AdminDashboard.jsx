@@ -553,8 +553,22 @@ const AdminDashboard = () => {
                                             {/* Article Row */}
                                             <div className="px-6 py-4 flex items-start justify-between gap-4 hover:bg-white/5 transition">
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="font-medium text-sm truncate">{article.title}</p>
-                                                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">{article.content}</p>
+                                                    <div className="flex flex-col gap-1">
+                                                        <p className="font-medium text-sm truncate">
+                                                            {article.title}
+                                                        </p>
+
+                                                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                                                            {article.content}
+                                                        </p>
+
+                                                        <button
+                                                            onClick={() => navigate(`/bacaan/${article.id}`)}
+                                                            className="text-xs text-blue-400 hover:text-blue-300 mt-1 text-left"
+                                                        >
+                                                            Baca selengkapnya →
+                                                        </button>
+                                                    </div>
                                                     {article.passingScore != null && (
                                                         <p className="text-xs text-green-400 mt-1">Passing score: {article.passingScore}%</p>
                                                     )}
