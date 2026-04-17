@@ -9,6 +9,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ListBacaan from "./pages/ListBacaan";
 import DetailBacaan from './pages/DetailBacaan';
 import DailyMissionPage from './pages/DailyMissionPage';
+import AchievementInventory from './pages/AchievementInventory';
+
 
 function App() {
   const location = useLocation();
@@ -29,6 +31,8 @@ function App() {
                 <Route path="/listBacaan" element={<ListBacaan />} />
                 <Route path="/bacaan/:id" element={<DetailBacaan />} />
                 <Route path="/missions" element={<DailyMissionPage />} />
+                <Route path="/achievements" element={<AchievementInventory />} />
+                
             </Routes>
           </main>
     </div>
