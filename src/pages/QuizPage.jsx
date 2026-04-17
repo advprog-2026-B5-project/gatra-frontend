@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import MilestoneNotification from "../components/MilestoneNotification";
 
 const QuizPage = () => {
     const { id: articleId } = useParams();
@@ -145,11 +147,17 @@ const QuizPage = () => {
 
     // ── Result screen ──
     if (result) {
-        const passed = result.passed;
-        const score = Math.round(result.score);
-        const passing = Math.round(result.passingScore);
+    const passed = result.passed;
+    const score = Math.round(result.score);
+    const passing = Math.round(result.passingScore);
 
-        return (
+    return (
+        <>
+            <MilestoneNotification 
+                unlockedAchievements={result.milestoneResponse?.newlyUnlockedAchievements || []} 
+                completedMissions={result.milestoneResponse?.completedMissions || []}
+            />
+
             <div className="min-h-screen bg-[#0B0F1E] flex items-center justify-center px-6 py-16">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 24 }}
@@ -157,7 +165,6 @@ const QuizPage = () => {
                     transition={{ duration: 0.5 }}
                     className="w-full max-w-md flex flex-col items-center gap-6"
                 >
-                    {/* Result icon */}
                     <div className="text-center flex flex-col gap-1">
                         <h2 className="text-2xl font-bold text-white">
                             {passed ? "Selamat, kamu lulus!" : "Belum lulus"}
@@ -169,9 +176,7 @@ const QuizPage = () => {
                         </p>
                     </div>
 
-                    {/* Score card */}
                     <div className="w-full bg-[#111A3B] rounded-2xl p-6 flex flex-col gap-4">
-                        {/* Score number */}
                         <div className="flex items-end justify-between">
                             <div>
                                 <p className="text-xs text-gray-500 mb-1">Nilai kamu</p>
@@ -185,7 +190,6 @@ const QuizPage = () => {
                             </div>
                         </div>
 
-                        {/* Score bar */}
                         <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
                             <motion.div
                                 initial={{ width: 0 }}
@@ -195,7 +199,6 @@ const QuizPage = () => {
                             />
                         </div>
 
-                        {/* Passing score marker */}
                         <p className="text-xs text-gray-500 text-center">
                             {passed
                                 ? `Kamu melampaui nilai minimum sebesar ${score - passing} poin`
@@ -203,7 +206,6 @@ const QuizPage = () => {
                         </p>
                     </div>
 
-                    {/* Per-question feedback */}
                     <div className="w-full flex flex-col gap-2">
                         <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Rincian jawaban</p>
                         {result.answers.map((a, i) => (
@@ -221,7 +223,6 @@ const QuizPage = () => {
                         ))}
                     </div>
 
-                    {/* Actions */}
                     <div className="w-full flex flex-col gap-3 pt-2">
                         <button
                             onClick={fetchQuestions}
@@ -238,8 +239,9 @@ const QuizPage = () => {
                     </div>
                 </motion.div>
             </div>
-        );
-    }
+        </>
+    );
+}
 
     // ── Quiz screen ──
     return (

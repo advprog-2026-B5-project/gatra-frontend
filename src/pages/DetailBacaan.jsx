@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import { markArticleAsRead } from "../api/article";
+import MilestoneNotification from "../components/MilestoneNotification";
 
 const fadeUp = {
     initial: { opacity: 0, y: 30 },
@@ -16,8 +18,12 @@ const DetailBacaan = () => {
     const [article, setArticle] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [unlockedAchievements, setUnlockedAchievements] = useState([]);
+    const [completedMissions, setCompletedMissions] = useState([]);
+    const markedAsReadRef = useRef(null);
 
     useEffect(() => {
+        markedAsReadRef.current = null;
         fetchArticle();
     }, [id]);
 
@@ -30,6 +36,22 @@ const DetailBacaan = () => {
             if (!res.ok) throw new Error("Artikel tidak ditemukan");
             const data = await res.json();
             setArticle(data);
+
+            if (markedAsReadRef.current !== id) {
+                markedAsReadRef.current = id;
+                try {
+                    const milestoneData = await markArticleAsRead(token, id);
+                    if (milestoneData?.newlyUnlockedAchievements?.length > 0) {
+                        setUnlockedAchievements(milestoneData.newlyUnlockedAchievements);
+                    }
+                    if (milestoneData?.completedMissions?.length > 0) {
+                        setCompletedMissions(milestoneData.completedMissions);
+                    }
+                } catch (err) {
+                    console.error("Gagal menandai artikel sebagai dibaca:", err);
+                    markedAsReadRef.current = null;
+                }
+            }
         } catch (err) {
             setError(err.message);
         } finally {
@@ -55,7 +77,7 @@ const DetailBacaan = () => {
                     <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center text-2xl">📭</div>
                     <p className="text-gray-400 text-sm">{error || "Artikel tidak ditemukan."}</p>
                     <button
-                        onClick={() => navigate("/bacaan")}
+                        onClick={() => navigate("/listBacaan")}
                         className="text-xs text-blue-400 hover:text-blue-300 transition underline underline-offset-2"
                     >
                         Kembali ke daftar bacaan
@@ -66,6 +88,12 @@ const DetailBacaan = () => {
     }
 
     return (
+    <>
+        <MilestoneNotification 
+            unlockedAchievements={unlockedAchievements} 
+            completedMissions={completedMissions} 
+        />
+
         <div className="min-h-screen px-6 md:px-10 py-16 max-w-3xl mx-auto w-full">
             <motion.button
                 initial={{ opacity: 0, x: -10 }}
@@ -89,13 +117,17 @@ const DetailBacaan = () => {
                         {article.categoryName}
                     </span>
                 </div>
+
                 <h1 className="font-display text-2xl md:text-3xl lg:text-4xl font-bold leading-snug">
                     {article.title}
                 </h1>
+
                 <div className="border-t border-white/10" />
+
                 <div className="text-gray-300 text-base bg-[#111A3B] rounded-2xl p-6 md:p-8 leading-relaxed whitespace-pre-wrap">
                     {article.content}
                 </div>
+
                 <button
                     onClick={() => navigate(`/quiz/${id}`)}
                     className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition"
@@ -104,7 +136,8 @@ const DetailBacaan = () => {
                 </button>
             </motion.article>
         </div>
-    );
+    </>
+);
 };
 
 export default DetailBacaan;
