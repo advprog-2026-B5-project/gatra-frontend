@@ -8,10 +8,11 @@ import OAuth2RedirectHandler from './OAuth2RedirectHandler.jsx';
 import AdminDashboard from "./pages/AdminDashboard";
 import ListBacaan from "./pages/ListBacaan";
 import DetailBacaan from './pages/DetailBacaan';
-import AchievementInventory from './pages/AchievementInventory';
-import DailyMissions from './pages/DailyMissions';
+
 import AdminQuiz from "./pages/AdminQuiz";
 import QuizPage from "./pages/QuizPage";
+import DailyMissionPage from './pages/DailyMissionPage';
+import AchievementInventory from './pages/AchievementInventory';
 
 function App() {
     const location = useLocation();
@@ -20,6 +21,7 @@ function App() {
     return (
         <div className="min-h-screen w-full bg-main text-white flex flex-col overflow-x-hidden font-sans">
             {!isAdminPage && <Navbar />}
+
             <main className="grow pb-20 overflow-y-auto">
                 <Routes>
                     <Route path="/" element={<LandingPage />} />
@@ -30,10 +32,14 @@ function App() {
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/listBacaan" element={<ListBacaan />} />
                     <Route path="/bacaan/:id" element={<DetailBacaan />} />
+                    
+                    {/* quiz */}
                     <Route path="/admin/quiz" element={<AdminQuiz />} />
                     <Route path="/quiz/:id" element={<QuizPage />} />
+
+                    {/* missions & achievements */}
+                    <Route path="/missions" element={<DailyMissionPage />} />
                     <Route path="/achievements" element={<AchievementInventory />} />
-                    <Route path="/missions" element={<DailyMissions />} />
                 </Routes>
             </main>
         </div>
