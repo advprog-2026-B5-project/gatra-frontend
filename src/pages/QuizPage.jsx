@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { motion, AnimatePresence } from "framer-motion";
 import MilestoneNotification from "../components/MilestoneNotification";
 
 const QuizPage = () => {
