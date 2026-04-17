@@ -9,28 +9,41 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ListBacaan from "./pages/ListBacaan";
 import DetailBacaan from './pages/DetailBacaan';
 
+import AdminQuiz from "./pages/AdminQuiz";
+import QuizPage from "./pages/QuizPage";
+import DailyMissions from "./pages/DailyMissions.jsx";
+import AchievementInventory from './pages/AchievementInventory';
+
 function App() {
-  const location = useLocation();
-  const isAdminPage = location.pathname.startsWith('/admin');
+    const location = useLocation();
+    const isAdminPage = location.pathname.startsWith('/admin');
 
-  return (
-    <div className="min-h-screen w-full bg-main text-white flex flex-col overflow-x-hidden font-sans">
-        {!isAdminPage && <Navbar />}
+    return (
+        <div className="min-h-screen w-full bg-main text-white flex flex-col overflow-x-hidden font-sans">
+            {!isAdminPage && <Navbar />}
 
-          <main className="grow pb-20 overflow-y-auto">
-            <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/listBacaan" element={<ListBacaan />} />
-                <Route path="/bacaan/:id" element={<DetailBacaan />} />
-            </Routes>
-          </main>
-    </div>
-  );
+            <main className="grow pb-20 overflow-y-auto">
+                <Routes>
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
+                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                    <Route path="/listBacaan" element={<ListBacaan />} />
+                    <Route path="/bacaan/:id" element={<DetailBacaan />} />
+                    
+                    {/* quiz */}
+                    <Route path="/admin/quiz" element={<AdminQuiz />} />
+                    <Route path="/quiz/:id" element={<QuizPage />} />
+
+                    {/* missions & achievements */}
+                    <Route path="/missions" element={<DailyMissions  />} />
+                    <Route path="/achievements" element={<AchievementInventory />} />
+                </Routes>
+            </main>
+        </div>
+    );
 }
 
 export default App;
