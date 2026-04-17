@@ -8,8 +8,9 @@ import OAuth2RedirectHandler from './OAuth2RedirectHandler.jsx';
 import AdminDashboard from "./pages/AdminDashboard";
 import ListBacaan from "./pages/ListBacaan";
 import DetailBacaan from './pages/DetailBacaan';
+import DailyMissionPage from './pages/DailyMissionPage';
 import AchievementInventory from './pages/AchievementInventory';
-import DailyMissions from './pages/DailyMissions';
+
 
 function App() {
   const location = useLocation();
@@ -29,8 +30,9 @@ function App() {
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/listBacaan" element={<ListBacaan />} />
                 <Route path="/bacaan/:id" element={<DetailBacaan />} />
+                <Route path="/missions" element={<DailyMissionPage />} />
                 <Route path="/achievements" element={<AchievementInventory />} />
-                <Route path="/missions" element={<DailyMissions />} />
+                
             </Routes>
           </main>
     </div>
