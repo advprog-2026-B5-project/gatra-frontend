@@ -8,14 +8,16 @@ const Navbar = () => {
 
     // State untuk status dropdown
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [pinnedAchievements, setPinnedAchievements] = useState([]);
 
     // Referensi untuk mendeteksi klik di luar menu dropdown
     const dropdownRef = useRef(null);
 
-    // Mengecek token secara langsung (Derived State)
+    // Mengecek token dan role secara langsung
     const isLoggedIn = !!localStorage.getItem('token');
+    const role = localStorage.getItem('role');
 
-    // 2. Efek untuk menutup dropdown jika user klik area kosong di layar
+    // 1. Efek untuk menutup dropdown jika user klik area kosong di layar
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -25,6 +27,28 @@ const Navbar = () => {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    // 2. Efek untuk mengambil data Achievement yang di-Pin (Showcase)
+    useEffect(() => {
+        const fetchPinnedAchievements = async () => {
+            // Hanya jalankan jika user sudah login dan bukan Admin
+            if (isLoggedIn && role !== 'ROLE_ADMIN') {
+                try {
+                    const token = localStorage.getItem('token');
+                    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/achievements/me/displayed`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        setPinnedAchievements(data);
+                    }
+                } catch (err) {
+                    console.error("Gagal load pinned achievements:", err);
+                }
+            }
+        };
+        fetchPinnedAchievements();
+    }, [isLoggedIn, role]);
 
     // 3. Fungsi Logout
     const handleLogout = () => {
@@ -68,9 +92,42 @@ const Navbar = () => {
 
                         {/* Kotak Menu Dropdown */}
                         {isDropdownOpen && (
-                            <div className="absolute right-0 top-14 mt-2 w-48 bg-[#131627] rounded-xl shadow-2xl py-2 border border-gray-800/60 z-50 animate-fade-in">
+                            <div className="absolute right-0 top-14 mt-2 w-64 bg-[#131627] rounded-xl shadow-2xl py-2 border border-gray-800/60 z-50 animate-fade-in overflow-hidden">
 
-                                {/* Opsi 1: Halaman Profil */}
+                                {/* --- Area Pinned Achievements (Khusus Pelajar) --- */}
+                                {role !== 'ROLE_ADMIN' && (
+                                    <div className="px-4 py-3 border-b border-gray-800/80 mb-1 bg-white/5">
+                                        <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2">Showcase</p>
+
+                                        {pinnedAchievements.length === 0 ? (
+                                            <p className="text-xs text-gray-500 italic">Belum ada achievement yang dipin.</p>
+                                        ) : (
+                                            <div className="flex gap-3">
+                                                {pinnedAchievements.map(ach => (
+                                                    <div key={ach.id} className="relative group cursor-pointer" title={ach.name}>
+                                                        <img
+                                                            src={ach.badgeUrl || 'https://via.placeholder.com/40'}
+                                                            alt={ach.name}
+                                                            className="w-10 h-10 rounded-lg border border-yellow-500/30 object-contain bg-yellow-500/10 shadow-[0_0_10px_rgba(234,179,8,0.1)] group-hover:scale-110 group-hover:border-yellow-400 transition-all"
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* --- Menu Navigasi Normal --- */}
+                                {role === 'ROLE_ADMIN' && (
+                                    <Link
+                                        to="/admin"
+                                        onClick={() => setIsDropdownOpen(false)}
+                                        className="block px-4 py-2.5 text-sm text-gray-300 hover:bg-[#1E2235] hover:text-white transition"
+                                    >
+                                        Dashboard Admin
+                                    </Link>
+                                )}
+
                                 <Link
                                     to="/profile"
                                     onClick={() => setIsDropdownOpen(false)}
@@ -79,9 +136,30 @@ const Navbar = () => {
                                     Profil Saya
                                 </Link>
 
+                                {/* Tombol Halaman Inventory (Khusus Pelajar) */}
+                                {role !== 'ROLE_ADMIN' && (
+                                    <Link
+                                        to="/achievements"
+                                        onClick={() => setIsDropdownOpen(false)}
+                                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-[#1E2235] hover:text-white transition"
+                                    >
+                                        <span>Achievement Saya</span>
+                                    </Link>
+                                )}
+
+                                {role !== 'ROLE_ADMIN' && (
+                                    <Link
+                                        to="/missions"
+                                        onClick={() => setIsDropdownOpen(false)}
+                                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-[#1E2235] hover:text-white transition"
+                                    >
+                                        <span>Misi Harian</span>
+                                    </Link>
+                                )}
+
                                 <div className="border-t border-gray-800/80 my-1"></div>
 
-                                {/* Opsi 2: Logout */}
+                                {/* Opsi Logout */}
                                 <button
                                     onClick={handleLogout}
                                     className="w-full text-left block px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition font-medium"

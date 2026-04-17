@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import DailyMissionManager from '../components/DailyMissionManager';
+import AchievementManager from '../components/AchievementManager';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -12,6 +14,7 @@ const AdminDashboard = () => {
     const [isLoadingUsers, setIsLoadingUsers] = useState(true);
     const [isLoadingArticles, setIsLoadingArticles] = useState(true);
     const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+    const [achievementCount, setAchievementCount] = useState(0);
 
     // Category state
     const [showAddCategory, setShowAddCategory] = useState(false);
@@ -226,7 +229,7 @@ const AdminDashboard = () => {
 
             <div className="max-w-6xl mx-auto px-6 py-8">
                 {/* Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                     <div className="bg-[#131627] rounded-2xl p-5 border border-gray-800">
                         <p className="text-xs text-gray-500 mb-1">Total Peserta</p>
                         <p className="text-3xl font-bold">{users.length}</p>
@@ -239,17 +242,21 @@ const AdminDashboard = () => {
                         <p className="text-xs text-gray-500 mb-1">Kategori</p>
                         <p className="text-3xl font-bold">{categories.length}</p>
                     </div>
+                    <div className="bg-[#131627] rounded-2xl p-5 border border-gray-800">
+                        <p className="text-xs text-gray-500 mb-1">Achievement</p>
+                        <p className="text-3xl font-bold">{achievementCount}</p>
+                    </div>
                 </div>
 
                 {/* Tabs */}
                 <div className="flex gap-2 mb-6">
-                    {['users', 'categories'].map(tab => (
+                    {['users', 'categories', 'achievements', 'missions'].map(tab => (
                         <button
                             key={tab}
-                            onClick={() => { setActiveTab(tab); setSelectedCategory(null); setShowAddArticle(false); setShowAddCategory(false); setFormError(''); setEditingCategory(null); setEditingArticle(null); }}
+                            onClick={() => { setActiveTab(tab); setSelectedCategory(null); setShowAddArticle(false); setShowAddCategory(false); setFormError(''); setFormSuccess(''); setEditingCategory(null); setEditingArticle(null); }}
                             className={`px-5 py-2 rounded-xl text-sm font-medium transition ${activeTab === tab ? 'bg-blue-600 text-white' : 'bg-[#131627] text-gray-400 hover:text-white border border-gray-800'}`}
                         >
-                            {tab === 'users' ? 'Peserta' : 'Kategori & Bacaan'}
+                            {tab === 'users' ? 'Peserta' : tab === 'categories' ? 'Kategori & Bacaan' : tab === 'achievements' ? 'Achievement' : 'Daily Mission'}
                         </button>
                     ))}
                 </div>
@@ -522,6 +529,17 @@ const AdminDashboard = () => {
                         </div>
                     </div>
                 )}
+
+                {/* Achievements */}
+                {activeTab === 'achievements' && (
+                    <AchievementManager onUpdateCount={setAchievementCount} />
+                )}
+
+                {/* Daily Mission Tab */}
+                {activeTab === 'missions' && (
+                    <DailyMissionManager />
+                )}
+
             </div>
         </div>
     );
