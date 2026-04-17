@@ -22,6 +22,7 @@ const DailyMissions = () => {
             return;
         }
         fetchMissions();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const fetchMissions = async () => {

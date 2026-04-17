@@ -10,6 +10,7 @@ const MilestoneNotification = ({ unlockedAchievements, completedMissions }) => {
             const unique = unlockedAchievements.filter(
                 (a, i, arr) => arr.findIndex(b => b.id === a.id) === i
             );
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setAchievements(unique);
         }
     }, [unlockedAchievements]);
@@ -19,6 +20,7 @@ const MilestoneNotification = ({ unlockedAchievements, completedMissions }) => {
             const unique = completedMissions.filter(
                 (m, i, arr) => arr.findIndex(b => b.missionId === m.missionId) === i
             );
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setMissions(unique);
         }
     }, [completedMissions]);

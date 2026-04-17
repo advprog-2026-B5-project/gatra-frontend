@@ -48,12 +48,14 @@ const AdminDashboard = () => {
     useEffect(() => {
         const role = localStorage.getItem('role');
         if (!token || role !== 'ROLE_ADMIN') navigate('/login');
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         fetchUsers();
         fetchArticles();
         fetchCategories();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const fetchUsers = async () => {

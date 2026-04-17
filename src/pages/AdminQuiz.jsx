@@ -19,6 +19,7 @@ const AdminQuiz = () => {
 
     useEffect(() => {
         fetchQuestions();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const fetchQuestions = async () => {
@@ -29,8 +30,9 @@ const AdminQuiz = () => {
             });
             const data = await res.json();
             setQuestions(data);
+            // eslint-disable-next-line no-unused-vars
         } catch (err) {
-            setError("Gagal memuat pertanyaan.");
+            setError("Gagal memuat pertanyaan.");  
         } finally {
             setIsLoading(false);
         }
@@ -86,8 +88,9 @@ const AdminQuiz = () => {
             });
             setQuestions(questions.filter(q => q.id !== id));
             setSuccess("Pertanyaan berhasil dihapus.");
+            // eslint-disable-next-line no-unused-vars
         } catch (err) {
-            setError("Gagal menghapus pertanyaan.");
+            setError("Gagal menghapus pertanyaan.");  
         }
     };
 

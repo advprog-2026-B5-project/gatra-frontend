@@ -11,7 +11,7 @@ import DetailBacaan from './pages/DetailBacaan';
 
 import AdminQuiz from "./pages/AdminQuiz";
 import QuizPage from "./pages/QuizPage";
-import DailyMissionPage from './pages/DailyMissionPage';
+import DailyMissions from "./pages/DailyMissions.jsx";
 import AchievementInventory from './pages/AchievementInventory';
 
 function App() {
@@ -38,7 +38,7 @@ function App() {
                     <Route path="/quiz/:id" element={<QuizPage />} />
 
                     {/* missions & achievements */}
-                    <Route path="/missions" element={<DailyMissionPage />} />
+                    <Route path="/missions" element={<DailyMissions  />} />
                     <Route path="/achievements" element={<AchievementInventory />} />
                 </Routes>
             </main>
