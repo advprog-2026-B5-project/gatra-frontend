@@ -73,6 +73,7 @@ const Navbar = () => {
                     <>
                         <Link to="/listBacaan" className="font-sans hover:text-white transition">Bacaan</Link>
                         <Link to="/missions" className="font-sans hover:text-white transition flex items-center gap-1">Daily Mission</Link>
+                        <Link to="/clan" className="font-sans hover:text-white transition flex items-center gap-1">Clan</Link>
                     </>
                 )}
                 <a href="#" className="hover:text-white transition">Tentang</a>

@@ -14,6 +14,8 @@ import QuizPage from "./pages/QuizPage";
 import DailyMissions from "./pages/DailyMissions.jsx";
 import AchievementInventory from './pages/AchievementInventory';
 
+import ClanPage from "./pages/ClanPage.jsx";
+
 function App() {
     const location = useLocation();
     const isAdminPage = location.pathname.startsWith('/admin');
@@ -40,6 +42,9 @@ function App() {
                     {/* missions & achievements */}
                     <Route path="/missions" element={<DailyMissions  />} />
                     <Route path="/achievements" element={<AchievementInventory />} />
+
+                    {/* clan */}
+                    <Route path="/clan" element={<ClanPage />} />
                 </Routes>
             </main>
         </div>
