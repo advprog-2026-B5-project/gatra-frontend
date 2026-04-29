@@ -6,6 +6,7 @@ import {
     createClan,
     applyToClan,
     decideMembership,
+    deleteClan,
 } from '../api/clan';
 
 function Spinner() {
@@ -230,7 +231,7 @@ function AllClansTab({ token, myClan, pendingClanId, onApply }) {
 }
 
 // your clan tab
-function YourClanTab({ token, myClan, pendingClanId }) {
+function YourClanTab({ token, myClan, pendingClanId, onClanDeleted }) {
     // Belum join atau masih pending
     if (!myClan || myClan.membershipStatus === 'PENDING' || pendingClanId) {
         return (
@@ -255,6 +256,24 @@ function YourClanTab({ token, myClan, pendingClanId }) {
     const clan = myClan;
     const isLeader = clan.myRole === 'LEADER';
 
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
+
+    const handleDeleteClan = async () => {
+        setDeleting(true);
+        setDeleteError('');
+        try {
+            await deleteClan(token, clan.id);
+            setShowDeleteConfirm(false);
+            onClanDeleted();
+        } catch (err) {
+            setDeleteError(err.message);
+        } finally {
+            setDeleting(false);
+        }
+    };
+
     return (
         <div className="space-y-4">
             {/* Clan card */}
@@ -275,19 +294,31 @@ function YourClanTab({ token, myClan, pendingClanId }) {
                         <p className="text-sm text-gray-400 mt-1">
                             {clan.description || 'Tidak ada deskripsi.'}
                         </p>
-                        <div className="flex gap-4 mt-3">
-                            <div>
-                                <p className="text-[10px] text-gray-600 uppercase tracking-wider font-bold">Anggota</p>
-                                <p className="text-sm font-bold text-white">{clan.memberCount ?? '—'}</p>
+                        <div className="flex items-end justify-between mt-3">
+                            <div className="flex gap-4">
+                                <div>
+                                    <p className="text-[10px] text-gray-600 uppercase tracking-wider font-bold">Anggota</p>
+                                    <p className="text-sm font-bold text-white">{clan.memberCount ?? '—'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-gray-600 uppercase tracking-wider font-bold">Tier</p>
+                                    <p className="text-sm font-bold text-white">{clan.tier ?? '—'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-gray-600 uppercase tracking-wider font-bold">Skor</p>
+                                    <p className="text-sm font-bold text-white">{clan.score ?? '—'}</p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-[10px] text-gray-600 uppercase tracking-wider font-bold">Tier</p>
-                                <p className="text-sm font-bold text-white">{clan.tier ?? '—'}</p>
-                            </div>
-                            <div>
-                                <p className="text-[10px] text-gray-600 uppercase tracking-wider font-bold">Skor</p>
-                                <p className="text-sm font-bold text-white">{clan.score ?? '—'}</p>
-                            </div>
+
+                            {/* Hapus Clan, hanya leader */}
+                            {isLeader && (
+                                <button
+                                    onClick={() => setShowDeleteConfirm(true)}
+                                    className="text-xs font-bold text-red-400 border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-xl transition"
+                                >
+                                    🗑 Hapus Clan
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -328,6 +359,49 @@ function YourClanTab({ token, myClan, pendingClanId }) {
                     </div>
                 </div>
             )}
+
+            {/* konfirmasi hapus clan */}
+            {showDeleteConfirm && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    style={{ background: 'rgba(5,9,24,0.85)', backdropFilter: 'blur(6px)' }}
+                    onClick={() => !deleting && setShowDeleteConfirm(false)}
+                >
+                    <div
+                        className="w-full max-w-sm bg-[#131627] border border-red-500/30 rounded-3xl p-8 shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="text-3xl mb-3 text-center">⚠️</div>
+                        <h2 className="text-lg font-bold text-white text-center mb-1">Hapus Clan?</h2>
+                        <p className="text-gray-400 text-sm text-center mb-6">
+                            Clan <span className="text-white font-bold">"{clan.name}"</span> akan dihapus permanen beserta seluruh anggotanya. Aksi ini tidak bisa dibatalkan.
+                        </p>
+
+                        {deleteError && (
+                            <div className="mb-4 p-3 rounded-xl text-xs bg-red-500/10 border border-red-500/30 text-red-400">
+                                {deleteError}
+                            </div>
+                        )}
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                disabled={deleting}
+                                className="flex-1 text-sm font-bold text-gray-400 border border-gray-700 rounded-xl py-2.5 hover:border-gray-500 transition disabled:opacity-50"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={handleDeleteClan}
+                                disabled={deleting}
+                                className="flex-1 text-sm font-bold bg-red-600 hover:bg-red-500 text-white rounded-xl py-2.5 transition disabled:opacity-50"
+                            >
+                                {deleting ? 'Menghapus...' : 'Ya, Hapus'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
@@ -337,7 +411,6 @@ function PendingApplicationRow({ app, clanId, token }) {
     const [loading, setLoading] = useState(null);
 
     const decide = async (decision) => {
-        if (status !== 'PENDING') return;
         setLoading(decision);
         try {
             await decideMembership(token, clanId, app.userId, decision);
@@ -417,6 +490,12 @@ const ClanPage = () => {
         setPendingClanId(clanId);
     };
 
+    const handleClanDeleted = () => {
+        setMyClan(null);
+        setPendingClanId(null);
+        setActiveTab('all');
+    };
+
     // bisa buat clan jika belum masuk di clan manapun (termasuk pending)
     const canMakeClan = token && !myClan && !pendingClanId;
 
@@ -491,6 +570,7 @@ const ClanPage = () => {
                         token={token}
                         myClan={myClan}
                         pendingClanId={pendingClanId}
+                        onClanDeleted={handleClanDeleted}
                     />
                 )}
             </div>
