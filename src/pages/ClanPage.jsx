@@ -7,6 +7,7 @@ import {
     applyToClan,
     decideMembership,
     deleteClan,
+    kickMember,
 } from '../api/clan';
 
 function Spinner() {
@@ -231,7 +232,7 @@ function AllClansTab({ token, myClan, pendingClanId, onApply }) {
 }
 
 // your clan tab
-function YourClanTab({ token, myClan, pendingClanId, onClanDeleted }) {
+function YourClanTab({ token, myClan, pendingClanId, onClanDeleted, onMemberKicked }) {
     // Belum join atau masih pending
     if (!myClan || myClan.membershipStatus === 'PENDING' || pendingClanId) {
         return (
@@ -259,6 +260,9 @@ function YourClanTab({ token, myClan, pendingClanId, onClanDeleted }) {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState('');
+    const [memberToKick, setMemberToKick] = useState(null);
+    const [kicking, setKicking] = useState(null);
+    const [kickError, setKickError] = useState('');
 
     const handleDeleteClan = async () => {
         setDeleting(true);
@@ -273,6 +277,22 @@ function YourClanTab({ token, myClan, pendingClanId, onClanDeleted }) {
             setDeleting(false);
         }
     };
+
+    const handleKick = async () => {
+        if (!memberToKick) return;
+        setKicking(true);
+        setKickError('');
+        try {
+            await kickMember(token, clan.id, memberToKick.userId);
+            setMemberToKick(null);
+            if (onMemberKicked) onMemberKicked();
+        } catch (err) {
+            setKickError(err.message);
+        } finally {
+            setKicking(false);
+        }
+
+    }
 
     return (
         <div className="space-y-4">
@@ -340,6 +360,16 @@ function YourClanTab({ token, myClan, pendingClanId, onClanDeleted }) {
                                 {member.role === 'LEADER' && (
                                     <span className="text-[10px] text-yellow-400">👑 Ketua</span>
                                 )}
+
+                                {/* Tombol kick, hanya untuk leader */}
+                                {isLeader && member.role !== 'LEADER' && (
+                                    <button
+                                        onClick={() => setMemberToKick(member)}
+                                        className="transition-opacity text-[10px] font-bold text-red-400 hover:text-red-300 bg-red-500/10 px-2 py-1 rounded-lg border border-red-500/20"
+                                    >
+                                        Kick
+                                    </button>
+                                )}
                             </div>
                         ))}
                     </div>
@@ -401,6 +431,49 @@ function YourClanTab({ token, myClan, pendingClanId, onClanDeleted }) {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Modal konfirmasi kick member */}
+            {memberToKick && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    style={{ background: 'rgba(5,9,24,0.85)', backdropFilter: 'blur(6px)' }}
+                    onclick={() => !kicking && setMemberToKick(null)}
+                >
+                    <div
+                        className="w-full max-w-sm bg-[#131627] border border-red-500/30 rounded-3xl p-8 shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="text-3xl mb-3 text-center">⚠️</div>
+                        <h2 className="text-lg font-bold text-white text-center mb-1">Hapus Clan?</h2>
+                        <p className="text-gray-400 text-sm text-center mb-6">
+                            Apakah kamu yakin ingin mengeluarkan <span className="text-white font-bold">"{memberToKick.displayName}"</span> dari clan?
+                        </p>
+
+                        {kickError && (
+                            <div className="mb-4 p-3 rounded-xl text-xs bg-red-500/10 border border-red-500/30 text-red-400">
+                                {kickError}
+                            </div>
+                        )}
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setMemberToKick(null)}
+                                disabled={kicking}
+                                className="flex-1 text-sm font-bold text-gray-400 border border-gray-700 rounded-xl py-2.5 hover:border-gray-500 transition disabled:opacity-50"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={handleKick}
+                                disabled={kicking}
+                                className="flex-1 text-sm font-bold bg-red-600 hover:bg-red-500 text-white rounded-xl py-2.5 transition disabled:opacity-50"
+                            >
+                                {kicking ? 'Memproses...' : 'Ya, kick'}
+                            </button>
+                        </div>
+                    </div>
+                </div> 
             )}
         </div>
     );
@@ -496,6 +569,10 @@ const ClanPage = () => {
         setActiveTab('all');
     };
 
+    const refreshClanData = () => {
+        getMyClan(token).then(setMyClan).catch(() => {});
+    }
+
     // bisa buat clan jika belum masuk di clan manapun (termasuk pending)
     const canMakeClan = token && !myClan && !pendingClanId;
 
@@ -571,6 +648,7 @@ const ClanPage = () => {
                         myClan={myClan}
                         pendingClanId={pendingClanId}
                         onClanDeleted={handleClanDeleted}
+                        onMemberKicked={refreshClanData}
                     />
                 )}
             </div>

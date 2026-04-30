@@ -49,6 +49,15 @@ export const deleteClan = async (token, clanId) => {
     if (!response.ok) throw new Error('Gagal menghapus clan');
 };
 
+export const kickMember = async (token, clanId, targetUserId) => {
+    const response = await fetch(`${BASE_URL}/${clanId}/members/${targetUserId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(token)
+    });
+    if (!response.ok) throw new Error('Gagal mengeluarkan anggota.');
+    return true;
+}
+
 // apply membership
 
 export const applyToClan = async (token, clanId) => {
