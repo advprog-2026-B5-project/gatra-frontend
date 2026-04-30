@@ -92,3 +92,12 @@ export const decideMembership = async (token, clanId, applicantId, decision) => 
     }
     return response.json();
 };
+
+export const leaveClan = async (token, clanId) => {
+    const response = await fetch(`${BASE_URL}/${clanId}/applications`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(token)
+    });
+    if (!response.ok) throw new Error('Gagal keluar dari clan');
+    return true;
+}

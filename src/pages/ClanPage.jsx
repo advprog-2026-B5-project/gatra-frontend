@@ -8,6 +8,7 @@ import {
     decideMembership,
     deleteClan,
     kickMember,
+    leaveClan,
 } from '../api/clan';
 
 function Spinner() {
@@ -263,6 +264,9 @@ function YourClanTab({ token, myClan, pendingClanId, onClanDeleted, onMemberKick
     const [memberToKick, setMemberToKick] = useState(null);
     const [kicking, setKicking] = useState(null);
     const [kickError, setKickError] = useState('');
+    const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+    const [leaving, setLeaving] = useState(false);
+    const [leaveError, setLeaveError] = useState('');
 
     const handleDeleteClan = async () => {
         setDeleting(true);
@@ -291,8 +295,22 @@ function YourClanTab({ token, myClan, pendingClanId, onClanDeleted, onMemberKick
         } finally {
             setKicking(false);
         }
-
     }
+
+    const handleLeave = async () => {
+        if (isLeader) return;
+        setLeaving(true);
+        setLeaveError('');
+        try {
+            await leaveClan(token, clan.id);
+            setShowLeaveConfirm(false);
+            onMemberKicked();
+        } catch (err) {
+            setLeaveError(err.message);
+        } finally {
+            setLeaving(false);
+        }
+    };
 
     return (
         <div className="space-y-4">
@@ -337,6 +355,15 @@ function YourClanTab({ token, myClan, pendingClanId, onClanDeleted, onMemberKick
                                     className="text-xs font-bold text-red-400 border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-xl transition"
                                 >
                                     🗑 Hapus Clan
+                                </button>
+                            )}
+
+                            {!isLeader && (
+                                <button
+                                    onClick={() => setShowLeaveConfirm(true)}
+                                    className="text-xs font-bold text-red-400 border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-xl transition"
+                                >
+                                    🚪 Keluar dari Clan
                                 </button>
                             )}
                         </div>
@@ -470,6 +497,49 @@ function YourClanTab({ token, myClan, pendingClanId, onClanDeleted, onMemberKick
                                 className="flex-1 text-sm font-bold bg-red-600 hover:bg-red-500 text-white rounded-xl py-2.5 transition disabled:opacity-50"
                             >
                                 {kicking ? 'Memproses...' : 'Ya, kick'}
+                            </button>
+                        </div>
+                    </div>
+                </div> 
+            )}
+
+            {/* Modal konfirmasi leave clan*/}
+            {showLeaveConfirm && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    style={{ background: 'rgba(5,9,24,0.85)', backdropFilter: 'blur(6px)' }}
+                    onclick={() => !leaving && setShowLeaveConfirm(false)}
+                >
+                    <div
+                        className="w-full max-w-sm bg-[#131627] border border-red-500/30 rounded-3xl p-8 shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="text-3xl mb-3 text-center">⚠️</div>
+                        <h2 className="text-lg font-bold text-white text-center mb-1">Hapus Clan?</h2>
+                        <p className="text-gray-400 text-sm text-center mb-6">
+                            Apakah kamu yakin ingin keluar dari clan <span className="text-white font-bold">"{clan.name}"</span>?
+                        </p>
+
+                        {leaveError && (
+                            <div className="mb-4 p-3 rounded-xl text-xs bg-red-500/10 border border-red-500/30 text-red-400">
+                                {leaveError}
+                            </div>
+                        )}
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowLeaveConfirm(false)}
+                                disabled={leaving}
+                                className="flex-1 text-sm font-bold text-gray-400 border border-gray-700 rounded-xl py-2.5 hover:border-gray-500 transition disabled:opacity-50"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={handleLeave}
+                                disabled={leaving}
+                                className="flex-1 text-sm font-bold bg-red-600 hover:bg-red-500 text-white rounded-xl py-2.5 transition disabled:opacity-50"
+                            >
+                                {kicking ? 'Memproses...' : 'Ya, keluar'}
                             </button>
                         </div>
                     </div>
