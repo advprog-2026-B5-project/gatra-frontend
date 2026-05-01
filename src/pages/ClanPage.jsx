@@ -32,7 +32,6 @@ function Feedback({ type, message }) {
     );
 }
 
-// make clan modal
 function MakeClanModal({ onClose, onCreated, token }) {
     const [form, setForm] = useState({ name: '', description: '' });
     const [loading, setLoading] = useState(false);
@@ -120,7 +119,6 @@ function MakeClanModal({ onClose, onCreated, token }) {
     );
 }
 
-// all clan tab
 function AllClansTab({ token, myClan, pendingClanId, onApply }) {
     const [clans, setClans] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -176,7 +174,6 @@ function AllClansTab({ token, myClan, pendingClanId, onApply }) {
                                 }`}
                             >
                                 <div className="flex flex-col md:flex-row md:items-center gap-4">
-                                    {/* Avatar placeholder */}
                                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600/40 to-lilac-sky-500/30 border border-white/10 flex items-center justify-center text-xl font-black text-white shrink-0">
                                         {clan.name.charAt(0).toUpperCase()}
                                     </div>
@@ -198,7 +195,6 @@ function AllClansTab({ token, myClan, pendingClanId, onApply }) {
                                         </p>
                                     </div>
 
-                                    {/* Action button */}
                                     <div className="shrink-0">
                                         {!token ? (
                                             <span className="text-xs text-gray-600 italic">Login untuk join</span>
@@ -232,9 +228,7 @@ function AllClansTab({ token, myClan, pendingClanId, onApply }) {
     );
 }
 
-// your clan tab
 function YourClanTab({ token, myClan, pendingClanId, onClanDeleted, onMemberKicked }) {
-    // Belum join atau masih pending
     if (!myClan || myClan.membershipStatus === 'PENDING' || pendingClanId) {
         return (
             <div className="bg-[#131627] border border-gray-800 rounded-3xl p-16 text-center">
@@ -314,7 +308,6 @@ function YourClanTab({ token, myClan, pendingClanId, onClanDeleted, onMemberKick
 
     return (
         <div className="space-y-4">
-            {/* Clan card */}
             <div className="bg-[#131627] border border-blue-500/20 rounded-3xl p-8">
                 <div className="flex items-start gap-5">
                     <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600/40 to-lilac-sky-500/30 border border-white/10 flex items-center justify-center text-3xl font-black text-white shrink-0">
@@ -344,11 +337,14 @@ function YourClanTab({ token, myClan, pendingClanId, onClanDeleted, onMemberKick
                                 </div>
                                 <div>
                                     <p className="text-[10px] text-gray-600 uppercase tracking-wider font-bold">Skor</p>
-                                    <p className="text-sm font-bold text-white">{clan.score ?? '—'}</p>
+                                    <p className="text-sm font-bold text-white">
+                                        {clan.score !== undefined && clan.score !== null
+                                            ? Math.round(clan.score).toLocaleString()
+                                            : '—'}
+                                    </p>
                                 </div>
                             </div>
 
-                            {/* Hapus Clan, hanya leader */}
                             {isLeader && (
                                 <button
                                     onClick={() => setShowDeleteConfirm(true)}
@@ -371,7 +367,6 @@ function YourClanTab({ token, myClan, pendingClanId, onClanDeleted, onMemberKick
                 </div>
             </div>
 
-            {/* Member list */}
             {clan.members && clan.members.length > 0 && (
                 <div className="bg-[#131627] border border-gray-800 rounded-3xl p-6">
                     <h3 className="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4">Anggota</h3>
@@ -388,7 +383,6 @@ function YourClanTab({ token, myClan, pendingClanId, onClanDeleted, onMemberKick
                                     <span className="text-[10px] text-yellow-400">👑 Ketua</span>
                                 )}
 
-                                {/* Tombol kick, hanya untuk leader */}
                                 {isLeader && member.role !== 'LEADER' && (
                                     <button
                                         onClick={() => setMemberToKick(member)}
@@ -403,7 +397,6 @@ function YourClanTab({ token, myClan, pendingClanId, onClanDeleted, onMemberKick
                 </div>
             )}
 
-            {/* Pending applications hanya bisa diliat leader */}
             {isLeader && clan.pendingApplications && clan.pendingApplications.length > 0 && (
                 <div className="bg-[#131627] border border-yellow-500/20 rounded-3xl p-6">
                     <h3 className="text-sm font-bold text-yellow-400 uppercase tracking-wider mb-4">
@@ -417,7 +410,6 @@ function YourClanTab({ token, myClan, pendingClanId, onClanDeleted, onMemberKick
                 </div>
             )}
 
-            {/* konfirmasi hapus clan */}
             {showDeleteConfirm && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -460,12 +452,11 @@ function YourClanTab({ token, myClan, pendingClanId, onClanDeleted, onMemberKick
                 </div>
             )}
 
-            {/* Modal konfirmasi kick member */}
             {memberToKick && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center p-4"
                     style={{ background: 'rgba(5,9,24,0.85)', backdropFilter: 'blur(6px)' }}
-                    onclick={() => !kicking && setMemberToKick(null)}
+                    onClick={() => !kicking && setMemberToKick(null)}
                 >
                     <div
                         className="w-full max-w-sm bg-[#131627] border border-red-500/30 rounded-3xl p-8 shadow-2xl"
@@ -500,15 +491,14 @@ function YourClanTab({ token, myClan, pendingClanId, onClanDeleted, onMemberKick
                             </button>
                         </div>
                     </div>
-                </div> 
+                </div>
             )}
 
-            {/* Modal konfirmasi leave clan*/}
             {showLeaveConfirm && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center p-4"
                     style={{ background: 'rgba(5,9,24,0.85)', backdropFilter: 'blur(6px)' }}
-                    onclick={() => !leaving && setShowLeaveConfirm(false)}
+                    onClick={() => !leaving && setShowLeaveConfirm(false)}
                 >
                     <div
                         className="w-full max-w-sm bg-[#131627] border border-red-500/30 rounded-3xl p-8 shadow-2xl"
@@ -539,11 +529,11 @@ function YourClanTab({ token, myClan, pendingClanId, onClanDeleted, onMemberKick
                                 disabled={leaving}
                                 className="flex-1 text-sm font-bold bg-red-600 hover:bg-red-500 text-white rounded-xl py-2.5 transition disabled:opacity-50"
                             >
-                                {kicking ? 'Memproses...' : 'Ya, keluar'}
+                                {leaving ? 'Memproses...' : 'Ya, keluar'}
                             </button>
                         </div>
                     </div>
-                </div> 
+                </div>
             )}
         </div>
     );
@@ -597,7 +587,6 @@ function PendingApplicationRow({ app, clanId, token }) {
     );
 }
 
-// main page
 const ClanPage = () => {
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
@@ -643,7 +632,6 @@ const ClanPage = () => {
         getMyClan(token).then(setMyClan).catch(() => {});
     }
 
-    // bisa buat clan jika belum masuk di clan manapun (termasuk pending)
     const canMakeClan = token && !myClan && !pendingClanId;
 
     const tabs = [
@@ -654,7 +642,6 @@ const ClanPage = () => {
     return (
         <div className="min-h-screen bg-[#0B0D1A] p-6 md:p-8 text-white">
             <div className="max-w-4xl mx-auto">
-                {/* Header */}
                 <header className="mb-8 flex items-start justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-lilac-sky-400 bg-clip-text text-transparent">
@@ -685,7 +672,6 @@ const ClanPage = () => {
                     </button>
                 </header>
 
-                {/* Tabs */}
                 <div className="flex gap-1 bg-white/5 border border-gray-800 rounded-2xl p-1 mb-6 w-fit">
                     {tabs.map((tab) => (
                         <button
@@ -702,7 +688,6 @@ const ClanPage = () => {
                     ))}
                 </div>
 
-                {/* Tab content */}
                 {loadingMyClan ? (
                     <Spinner />
                 ) : activeTab === 'all' ? (
@@ -723,7 +708,6 @@ const ClanPage = () => {
                 )}
             </div>
 
-            {/* Clan modal */}
             {showModal && (
                 <MakeClanModal
                     token={token}
