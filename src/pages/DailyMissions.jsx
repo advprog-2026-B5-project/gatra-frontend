@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getActiveMissionsWithProgress, claimMissionReward } from '../api/missionProgress';
+import NotificationToast from '../components/NotificationToast';
 
 const ACTION_TYPE_LABELS = {
     READ_ARTICLE: 'Membaca Artikel',
@@ -15,6 +16,9 @@ const DailyMissions = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [claimingId, setClaimingId] = useState(null);
     const [feedback, setFeedback] = useState({ type: '', message: '' });
+
+    // NEW: Notification state
+    const [notification, setNotification] = useState(null);
 
     useEffect(() => {
         if (!token) {
@@ -38,14 +42,20 @@ const DailyMissions = () => {
         }
     };
 
-    const handleClaim = async (missionId) => {
+    // UPDATED: Accept title and points to show in the toast
+    const handleClaim = async (missionId, title, points) => {
         setClaimingId(missionId);
         setFeedback({ type: '', message: '' });
         try {
             await claimMissionReward(token, missionId);
-            setFeedback({ type: 'success', message: 'Reward berhasil diklaim!' });
+
+            // Trigger the Notification Toast instead of basic feedback
+            setNotification({
+                message: `Misi Selesai: ${title}`,
+                points: points
+            });
+
             fetchMissions();
-            setTimeout(() => setFeedback({ type: '', message: '' }), 3000);
         } catch (err) {
             setFeedback({ type: 'error', message: err.message });
         } finally {
@@ -58,7 +68,7 @@ const DailyMissions = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#0B0D1A] p-6 md:p-8 text-white">
+        <div className="min-h-screen bg-[#0B0D1A] p-6 md:p-8 text-white relative overflow-hidden">
             <div className="max-w-4xl mx-auto">
                 <header className="mb-10">
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent">
@@ -69,12 +79,8 @@ const DailyMissions = () => {
                     </p>
                 </header>
 
-                {feedback.message && (
-                    <div className={`mb-6 p-4 rounded-2xl text-sm border ${
-                        feedback.type === 'success'
-                            ? 'bg-green-500/10 border-green-500/30 text-green-400'
-                            : 'bg-red-500/10 border-red-500/30 text-red-400'
-                    }`}>
+                {feedback.message && feedback.type === 'error' && (
+                    <div className="mb-6 p-4 rounded-2xl text-sm border bg-red-500/10 border-red-500/30 text-red-400">
                         {feedback.message}
                     </div>
                 )}
@@ -164,7 +170,7 @@ const DailyMissions = () => {
                                                     </span>
                                                 ) : isComplete ? (
                                                     <button
-                                                        onClick={() => handleClaim(mission.missionId)}
+                                                        onClick={() => handleClaim(mission.missionId, mission.title, mission.rewardPoints)}
                                                         disabled={claimingId === mission.missionId}
                                                         className="text-xs font-bold bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-1.5 rounded-xl transition disabled:opacity-50 shadow-lg shadow-yellow-500/20"
                                                     >
@@ -184,6 +190,15 @@ const DailyMissions = () => {
                     </div>
                 )}
             </div>
+
+            {/* Render the Notification Toast */}
+            {notification && (
+                <NotificationToast
+                    message={notification.message}
+                    points={notification.points}
+                    onClose={() => setNotification(null)}
+                />
+            )}
         </div>
     );
 };
