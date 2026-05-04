@@ -25,8 +25,10 @@ const Profile = () => {
         }
 
         const fetchProfile = async () => {
+            let response;
+
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${userId}`, {
+                response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${userId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -42,7 +44,7 @@ const Profile = () => {
             } catch (err) {
                 setError(err.message);
 
-                if (err.message.includes('Sesi')) {
+                if (err.message.includes('Sesi') || response?.status === 401) {
                     localStorage.clear();
                     navigate('/login');
                 }
