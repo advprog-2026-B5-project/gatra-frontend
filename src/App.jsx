@@ -15,6 +15,7 @@ import DailyMissions from "./pages/DailyMissions.jsx";
 import AchievementInventory from './pages/AchievementInventory';
 
 import ClanPage from "./pages/ClanPage.jsx";
+import PublicProfile from "./pages/PublicProfile.jsx";
 
 function App() {
     const location = useLocation();
@@ -34,6 +35,7 @@ function App() {
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/listBacaan" element={<ListBacaan />} />
                     <Route path="/bacaan/:id" element={<DetailBacaan />} />
+                    <Route path="/u/:username" element={<PublicProfile />} />
                     
                     {/* quiz */}
                     <Route path="/admin/quiz" element={<AdminQuiz />} />
