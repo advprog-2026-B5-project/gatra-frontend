@@ -37,6 +37,7 @@ const ListBacaan = () => {
 
     useEffect(() => {
         fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -47,6 +48,7 @@ const ListBacaan = () => {
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
+         
     }, []);
 
     const fetchData = async () => {

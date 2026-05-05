@@ -70,7 +70,10 @@ const Navbar = () => {
             <div className="hidden md:flex gap-8 text-gray-300">
                 <Link to="/" className="font-sans hover:text-white transition">Beranda</Link>
                 {isLoggedIn && (
-                    <Link to="/listBacaan" className="font-sans hover:text-white transition">Bacaan</Link>
+                    <>
+                        <Link to="/listBacaan" className="font-sans hover:text-white transition">Bacaan</Link>
+                        <Link to="/missions" className="font-sans hover:text-white transition flex items-center gap-1">Daily Mission</Link>
+                    </>
                 )}
                 <a href="#" className="hover:text-white transition">Tentang</a>
             </div>

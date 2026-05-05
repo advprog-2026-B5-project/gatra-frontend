@@ -83,3 +83,12 @@ export const deleteCategory = async (token, id) => {
     });
     if (!response.ok) throw new Error("Gagal hapus kategori");
 };
+
+export const markArticleAsRead = async (token, id) => {
+    const response = await fetch(`${API_URL}/api/articles/${id}/read`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error("Gagal menandai artikel sebagai dibaca");
+    return response.json();
+};
