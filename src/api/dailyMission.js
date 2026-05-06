@@ -1,4 +1,4 @@
-const BASE_URL = `${import.meta.env.VITE_API_URL}/api/admin/daily-missions`;
+const BASE_URL = `${import.meta.env.VITE_API_URL}/api/admin/missions`;
 
 const getAuthHeaders = (token) => ({
     'Content-Type': 'application/json',
