@@ -6,7 +6,7 @@ const getAuthHeaders = (token) => ({
 });
 
 export const getActiveMissionsWithProgress = async (token) => {
-    const response = await fetch(`${API_URL}/api/missions/progress`, {
+    const response = await fetch(`${API_URL}/api/missions/me`, {
         headers: getAuthHeaders(token)
     });
     if (!response.ok) throw new Error('Gagal mengambil data misi harian');
@@ -14,7 +14,7 @@ export const getActiveMissionsWithProgress = async (token) => {
 };
 
 export const claimMissionReward = async (token, missionId) => {
-    const response = await fetch(`${API_URL}/api/missions/${missionId}/claim`, {
+    const response = await fetch(`${API_URL}/api/missions/me/claim/${missionId}`, {
         method: 'POST',
         headers: getAuthHeaders(token)
     });
