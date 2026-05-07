@@ -9,6 +9,7 @@ import {
     deleteClan,
     kickMember,
     leaveClan,
+    getAllTierLeaderboards,
 } from '../api/clan';
 
 function Spinner() {
@@ -597,6 +598,112 @@ function PendingApplicationRow({ app, clanId, token }) {
     );
 }
 
+const TIER_COLORS = {
+    BRONZE: { border: 'border-amber-700/40', text: 'text-amber-600', bg: 'bg-amber-700/10', badge: '🥉' },
+    SILVER: { border: 'border-gray-400/40', text: 'text-gray-300', bg: 'bg-gray-400/10', badge: '🥈' },
+    GOLD: { border: 'border-yellow-400/40', text: 'text-yellow-400', bg: 'bg-yellow-400/10', badge: '🥇' },
+    DIAMOND: { border: 'border-cyan-400/40', text: 'text-cyan-400', bg: 'bg-cyan-400/10', badge: '💎' },
+};
+
+const RANK_MEDALS = { 1: '🥇', 2: '🥈', 3: '🥉' };
+
+function LeaderboardTab() {
+    const [leaderboards, setLeaderboards] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [activeTier, setActiveTier] = useState('BRONZE');
+
+    useEffect(() => {
+        getAllTierLeaderboards()
+            .then(setLeaderboards)
+            .catch((err) => setError(err.message))
+            .finally(() => setLoading(false));
+    }, []);
+
+    if (loading) return <Spinner />;
+    if (error) return <Feedback type="error" message={error} />;
+
+    const currentTierData = leaderboards.find((lb) => lb.tier === activeTier);
+
+    return (
+        <div className="space-y-4">
+            {/* Tier selector */}
+            <div className="flex gap-1 bg-white/5 border border-gray-800 rounded-2xl p-1 w-fit">
+                {Object.keys(TIER_COLORS).map((tier) => {
+                    const colors = TIER_COLORS[tier];
+                    return (
+                        <button
+                            key={tier}
+                            onClick={() => setActiveTier(tier)}
+                            className={`text-sm font-bold px-4 py-2 rounded-xl transition ${
+                                activeTier === tier
+                                    ? `${colors.bg} ${colors.text} border ${colors.border}`
+                                    : 'text-gray-400 hover:text-white'
+                            }`}
+                        >
+                            {colors.badge} {tier}
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* Rankings */}
+            <div className="bg-[#131627] border border-gray-800 rounded-3xl p-6">
+                <h3 className={`text-sm font-bold uppercase tracking-wider mb-4 ${TIER_COLORS[activeTier].text}`}>
+                    {TIER_COLORS[activeTier].badge} Tier {activeTier}
+                </h3>
+
+                {!currentTierData || currentTierData.rankings.length === 0 ? (
+                    <div className="text-center py-10">
+                        <p className="text-gray-500 text-sm">Belum ada clan di tier ini.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-3">
+                        {currentTierData.rankings.map((entry) => (
+                            <div
+                                key={entry.clanId}
+                                className={`flex items-center gap-4 p-4 rounded-2xl border ${
+                                    entry.rank <= 3
+                                        ? `${TIER_COLORS[activeTier].bg} ${TIER_COLORS[activeTier].border}`
+                                        : 'bg-white/5 border-gray-800'
+                                }`}
+                            >
+                                {/* Rank */}
+                                <div className="w-8 text-center shrink-0">
+                                    {RANK_MEDALS[entry.rank] ? (
+                                        <span className="text-xl">{RANK_MEDALS[entry.rank]}</span>
+                                    ) : (
+                                        <span className="text-sm font-bold text-gray-500">#{entry.rank}</span>
+                                    )}
+                                </div>
+
+                                {/* Avatar */}
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600/40 to-purple-500/30 border border-white/10 flex items-center justify-center text-sm font-black text-white shrink-0">
+                                    {entry.clanName.charAt(0).toUpperCase()}
+                                </div>
+
+                                {/* Clan name */}
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-bold text-white truncate">{entry.clanName}</p>
+                                    <p className="text-xs text-gray-500">Tier {entry.tier}</p>
+                                </div>
+
+                                {/* Score */}
+                                <div className="shrink-0 text-right">
+                                    <p className={`text-sm font-bold ${TIER_COLORS[activeTier].text}`}>
+                                        {entry.score.toFixed(1)}
+                                    </p>
+                                    <p className="text-[10px] text-gray-600 uppercase tracking-wider">poin</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
 // main page
 const ClanPage = () => {
     const navigate = useNavigate();
@@ -649,6 +756,7 @@ const ClanPage = () => {
     const tabs = [
         { key: 'all', label: 'Semua Clan' },
         { key: 'your', label: 'Clan Kamu' },
+        { key: 'leaderboard', label: 'Leaderboard' },
     ];
 
     return (
@@ -712,6 +820,8 @@ const ClanPage = () => {
                         pendingClanId={pendingClanId}
                         onApply={handleApplied}
                     />
+                ) : activeTab === 'leaderboard' ? (
+                    <LeaderboardTab />
                 ) : (
                     <YourClanTab
                         token={token}
