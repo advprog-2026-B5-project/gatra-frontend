@@ -101,3 +101,17 @@ export const leaveClan = async (token, clanId) => {
     if (!response.ok) throw new Error('Gagal keluar dari clan');
     return true;
 }
+
+// leaderboard
+
+export const getAllTierLeaderboards = async () => {
+    const response = await fetch(`${BASE_URL}/leaderboard`);
+    if (!response.ok) throw new Error('Gagal mengambil data leaderboard');
+    return response.json();
+};
+
+export const getLeaderboardByTier = async (tier) => {
+    const response = await fetch(`${BASE_URL}/leaderboard/${tier}`);
+    if (!response.ok) throw new Error(`Gagal mengambil leaderboard tier ${tier}`);
+    return response.json();
+};
