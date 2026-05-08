@@ -6,10 +6,8 @@ import useNewAchievementChecker from '../hooks/useNewAchievementChecker';
 const Profile = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
-
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-
     const [isEditing, setIsEditing] = useState(false);
     const [editFormData, setEditFormData] = useState({ displayName: '', phoneNumber: '' });
 
@@ -17,9 +15,7 @@ const Profile = () => {
     const token = localStorage.getItem('token');
     const { newAchievements } = useNewAchievementChecker();
 
-
     const [achievements, setAchievements] = useState([]);
-
 
     useEffect(() => {
         if (!userId || !token) {
@@ -59,7 +55,6 @@ const Profile = () => {
         fetchProfile();
     }, [userId, token, navigate]);
 
-
     useEffect(() => {
         const fetchAchievements = async () => {
             try {
@@ -75,8 +70,6 @@ const Profile = () => {
                 if (!res.ok) throw new Error("Gagal fetch achievements");
 
                 const data = await res.json();
-
-                // backend sudah limit 3
                 setAchievements(data);
 
             } catch (err) {
@@ -86,7 +79,6 @@ const Profile = () => {
 
         if (token) fetchAchievements();
     }, [token]);
-
 
     const handleUpdate = async (e) => {
         e.preventDefault();
@@ -110,7 +102,6 @@ const Profile = () => {
             alert(err.message);
         }
     };
-
 
     const handleDelete = async () => {
         const isConfirmed = window.confirm(
@@ -147,19 +138,33 @@ const Profile = () => {
         <>
         <MilestoneNotification unlockedAchievements={newAchievements} completedMissions={[]} />
         <div className="flex-1 w-full relative overflow-hidden flex flex-col items-center justify-center p-4 pb-20 pt-10">
-
             {/* Background Glow Effect */}
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-200 h-100 bg-purple-600/20 blur-[120px] rounded-t-full pointer-events-none"></div>
 
             <div className="bg-[#131627] p-8 md:p-10 rounded-3xl w-full max-w-125 shadow-2xl border border-gray-800/60 relative z-10">
-
                 <h2 className="text-2xl font-bold text-center mb-8 tracking-wide text-white">
                     Profil Saya
                 </h2>
 
-
                 {!isEditing ? (
                     <div className="space-y-4">
+
+                        {/* Player Stats Grid */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-[#1E2235] p-4 rounded-xl border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.1)]">
+                                <p className="text-xs text-blue-400 uppercase font-bold mb-1">Total Score</p>
+                                <p className="font-medium text-2xl text-white">
+                                    {user.totalScore !== undefined ? user.totalScore.toLocaleString() : '0'} <span className="text-sm text-gray-400 font-normal">pts</span>
+                                </p>
+                            </div>
+
+                            <div className="bg-[#1E2235] p-4 rounded-xl border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.1)]">
+                                <p className="text-xs text-purple-400 uppercase font-bold mb-1">League Tier</p>
+                                <p className="font-medium text-2xl text-white">
+                                    {user.currentLeagueTier || 'Bronze'}
+                                </p>
+                            </div>
+                        </div>
 
                         <div className="bg-[#1E2235] p-4 rounded-xl border border-gray-700/50">
                             <p className="text-xs text-gray-400 uppercase font-semibold mb-1">Username</p>
@@ -185,7 +190,6 @@ const Profile = () => {
                             </p>
                         </div>
 
-
                         <div className="bg-[#131627] border border-gray-700/50 p-4 rounded-xl">
                             <p className="text-xs text-gray-400 uppercase font-semibold mb-3">
                                 Achievements
@@ -210,9 +214,7 @@ const Profile = () => {
                             )}
                         </div>
 
-                        {}
                         <div className="pt-6 flex flex-col gap-3">
-
                             <button
                                 onClick={() => setIsEditing(true)}
                                 className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition"
@@ -226,14 +228,10 @@ const Profile = () => {
                             >
                                 Hapus Akun Permanen
                             </button>
-
                         </div>
                     </div>
-
                 ) : (
-
                     <form onSubmit={handleUpdate} className="space-y-4">
-
                         <div>
                             <label className="block text-xs text-gray-400 mb-1.5 font-medium ml-1">
                                 Display Name
@@ -264,7 +262,6 @@ const Profile = () => {
                         </div>
 
                         <div className="pt-6 flex gap-3">
-
                             <button
                                 type="button"
                                 onClick={() => setIsEditing(false)}
@@ -279,14 +276,11 @@ const Profile = () => {
                             >
                                 Simpan
                             </button>
-
                         </div>
-
                     </form>
                 )}
             </div>
 
-            {/* Logout */}
             <button
                 onClick={handleLogout}
                 className="mt-8 text-sm text-gray-400 hover:text-white transition font-medium relative z-10"
