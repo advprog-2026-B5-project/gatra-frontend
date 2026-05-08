@@ -1,7 +1,7 @@
 const API_URL = `${import.meta.env.VITE_API_URL}`;
 
 export const getAllAchievements = async (token) => {
-    const response = await fetch(`${API_URL}/api/achievements`, {
+    const response = await fetch(`${API_URL}/api/admin/achievements`, {
         headers: { "Authorization": `Bearer ${token}` }
     });
     if (!response.ok) throw new Error("Gagal mengambil achievement");
@@ -9,7 +9,7 @@ export const getAllAchievements = async (token) => {
 };
 
 export const getAchievementById = async (token, id) => {
-    const response = await fetch(`${API_URL}/api/achievements/${id}`, {
+    const response = await fetch(`${API_URL}/api/admin/achievements/${id}`, {
         headers: { "Authorization": `Bearer ${token}` }
     });
     if (!response.ok) throw new Error("Gagal mengambil detail achievement");
@@ -17,7 +17,7 @@ export const getAchievementById = async (token, id) => {
 };
 
 export const createAchievement = async (token, data) => {
-    const response = await fetch(`${API_URL}/api/achievements`, {
+    const response = await fetch(`${API_URL}/api/admin/achievements`, {
         method: "POST",
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -33,7 +33,7 @@ export const createAchievement = async (token, data) => {
 };
 
 export const updateAchievement = async (token, id, data) => {
-    const response = await fetch(`${API_URL}/api/achievements/${id}`, {
+    const response = await fetch(`${API_URL}/api/admin/achievements/${id}`, {
         method: "PUT",
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -49,7 +49,7 @@ export const updateAchievement = async (token, id, data) => {
 };
 
 export const deleteAchievement = async (token, id) => {
-    const response = await fetch(`${API_URL}/api/achievements/${id}`, {
+    const response = await fetch(`${API_URL}/api/admin/achievements/${id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
     });

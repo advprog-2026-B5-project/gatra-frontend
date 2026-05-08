@@ -1,8 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DailyMissionManager from '../components/DailyMissionManager';
 import AchievementManager from '../components/AchievementManager';
+// import { triggerSeasonReset } from '../api/admin';
+import { endSeasonFull } from '../api/admin';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -44,6 +45,10 @@ const AdminDashboard = () => {
     const [passingScoreForm, setPassingScoreForm] = useState('');
     const [quizError, setQuizError] = useState('');
     const [quizSuccess, setQuizSuccess] = useState('');
+
+    // --- Season Reset state ---
+    const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+    const [isResetting, setIsResetting] = useState(false);
 
     useEffect(() => {
         const role = localStorage.getItem('role');
@@ -234,7 +239,7 @@ const AdminDashboard = () => {
                 body: JSON.stringify({ ...questionForm, articleId }),
             });
             if (!res.ok) throw new Error('Gagal menambah pertanyaan');
-            setQuestionForm({ text: '', options: ['', '', '', ''], correctAnswer: '', type: 'MULTIPLE_CHOICE' }); // ✅ reset + type
+            setQuestionForm({ text: '', options: ['', '', '', ''], correctAnswer: '', type: 'MULTIPLE_CHOICE' });
             setShowAddQuestion(false);
             setQuizSuccess('Pertanyaan berhasil ditambahkan!');
             fetchQuestions(articleId);
@@ -324,14 +329,14 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-2 mb-6">
-                    {['users', 'categories', 'achievements', 'missions'].map(tab => (
+                <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+                    {['users', 'categories', 'achievements', 'missions', 'season'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => { setActiveTab(tab); setSelectedCategory(null); setShowAddArticle(false); setShowAddCategory(false); setFormError(''); setFormSuccess(''); setEditingCategory(null); setEditingArticle(null); setExpandedQuizArticleId(null); }}
-                            className={`px-5 py-2 rounded-xl text-sm font-medium transition ${activeTab === tab ? 'bg-blue-600 text-white' : 'bg-[#131627] text-gray-400 hover:text-white border border-gray-800'}`}
+                            className={`px-5 py-2 rounded-xl text-sm font-medium transition whitespace-nowrap ${activeTab === tab ? 'bg-blue-600 text-white' : 'bg-[#131627] text-gray-400 hover:text-white border border-gray-800'}`}
                         >
-                            {tab === 'users' ? 'Peserta' : tab === 'categories' ? 'Kategori & Bacaan' : tab === 'achievements' ? 'Achievement' : 'Daily Mission'}
+                            {tab === 'users' ? 'Peserta' : tab === 'categories' ? 'Kategori & Bacaan' : tab === 'achievements' ? 'Achievement' : tab === 'missions' ? 'Daily Mission' : 'Musim (Season)'}
                         </button>
                     ))}
                 </div>
@@ -705,11 +710,11 @@ const AdminDashboard = () => {
                                                         <div className="bg-[#131627] rounded-xl border border-yellow-500/30 p-4 mb-4">
                                                             <p className="text-xs text-yellow-400 font-semibold mb-3">Edit Pertanyaan</p>
                                                             <div className="flex flex-col gap-3">
-    <textarea rows={2}
-              value={editQuestionForm.text}
-              onChange={e => setEditQuestionForm({ ...editQuestionForm, text: e.target.value })}
-              className="w-full bg-[#1E2235] border border-yellow-500/30 focus:border-yellow-500 rounded-lg px-3 py-2 text-sm outline-none text-white resize-none transition"
-    />
+                                                                <textarea rows={2}
+                                                                          value={editQuestionForm.text}
+                                                                          onChange={e => setEditQuestionForm({ ...editQuestionForm, text: e.target.value })}
+                                                                          className="w-full bg-[#1E2235] border border-yellow-500/30 focus:border-yellow-500 rounded-lg px-3 py-2 text-sm outline-none text-white resize-none transition"
+                                                                />
 
                                                                 {/* Hanya tampil kalau Multiple Choice */}
                                                                 {editQuestionForm.type === 'MULTIPLE_CHOICE' && (
@@ -835,6 +840,81 @@ const AdminDashboard = () => {
                     <DailyMissionManager />
                 )}
 
+                {/* Season Tab */}
+                {activeTab === 'season' && (
+                    <div className="bg-[#131627] rounded-2xl border border-red-500/30 overflow-hidden p-6 shadow-2xl">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="text-3xl">⚠️</div>
+                            <div>
+                                <h2 className="text-lg font-bold text-red-400">Danger Zone: Reset Season</h2>
+                                <p className="text-sm text-gray-400">Atur ulang seluruh poin klan dan mahasiswa.</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl mb-6">
+                            <p className="text-sm text-gray-300">
+                                Tindakan mereset musim akan:
+                            </p>
+                            <ul className="list-disc list-inside text-sm text-gray-400 mt-2 space-y-1">
+                                <li>Mengembalikan total poin seluruh <strong className="text-white">Mahasiswa</strong> ke 0.</li>
+                                <li>Mengembalikan total poin seluruh <strong className="text-white">Klan</strong> ke 0.</li>
+                                <li>Membersihkan seluruh <strong className="text-white">Riwayat Poin (Point History)</strong>.</li>
+                            </ul>
+                            <p className="text-sm text-red-400 font-bold mt-4">Aksi ini bersifat permanen dan tidak dapat dibatalkan.</p>
+                        </div>
+
+                        <button
+                            onClick={() => setIsResetModalOpen(true)}
+                            className="bg-red-600/20 hover:bg-red-600/40 text-red-400 border border-red-500/50 px-6 py-3 rounded-xl text-sm font-bold transition flex items-center gap-2"
+                        >
+                            Reset Musim Sekarang
+                        </button>
+                    </div>
+                )}
+
+                {/* Modal Konfirmasi Reset Season */}
+                {isResetModalOpen && (
+                    <div className="fixed inset-0 flex items-center justify-center p-4 z-[100]" style={{ background: 'rgba(5,9,24,0.85)', backdropFilter: 'blur(6px)' }}>
+                        <div className="bg-[#131627] p-8 rounded-3xl shadow-2xl max-w-md w-full border border-red-500/30">
+                            <div className="text-5xl mb-4 text-center animate-pulse">☢️</div>
+                            <h3 className="text-xl font-bold text-white text-center mb-2">Konfirmasi Final</h3>
+                            <p className="text-gray-400 text-sm text-center mb-6">
+                                Apakah Anda yakin 100% ingin mereset papan peringkat?
+                                <strong className="text-red-400 block mt-2"> Seluruh data poin akan hilang.</strong>
+                            </p>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setIsResetModalOpen(false)}
+                                    disabled={isResetting}
+                                    className="flex-1 px-4 py-2.5 text-gray-400 border border-gray-700 rounded-xl hover:border-gray-500 hover:text-white transition disabled:opacity-50 text-sm font-bold"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        setIsResetting(true);
+                                        try {
+                                            const res = await endSeasonFull(token);
+                                            alert(res.data?.message || "Season berhasil direset! Semua skor kembali ke 0.");
+                                            setIsResetModalOpen(false);
+                                            // Opsional: refresh table
+                                            // fetchUsers();
+                                        } catch (error) {
+                                            alert("Gagal mereset season: " + (error.response?.data?.error || error.message));
+                                        } finally {
+                                            setIsResetting(false);
+                                        }
+                                    }}
+                                    disabled={isResetting}
+                                    className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl transition disabled:opacity-50 text-sm font-bold shadow-lg shadow-red-600/20"
+                                >
+                                    {isResetting ? "Memproses..." : "Ya, Saya Yakin"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
