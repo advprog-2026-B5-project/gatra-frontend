@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Logo from '../components/Logo';
 import Button from '../components/Button';
+import GlobalSearch from './GlobalSearch';
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -73,13 +74,18 @@ const Navbar = () => {
                     <>
                         <Link to="/listBacaan" className="font-sans hover:text-white transition">Bacaan</Link>
                         <Link to="/missions" className="font-sans hover:text-white transition flex items-center gap-1">Daily Mission</Link>
+                        <Link to="/clan" className="font-sans hover:text-white transition flex items-center gap-1">Clan</Link>
                     </>
                 )}
                 <a href="#" className="hover:text-white transition">Tentang</a>
             </div>
 
-            {/* Bagian Kanan (Login / Profile) */}
-            <div className="flex items-center relative" ref={dropdownRef}>
+            {/* Bagian Kanan (Search & Login / Profile) */}
+            <div className="flex items-center gap-4 relative" ref={dropdownRef}>
+
+                {/* Global Search Bar */}
+                {isLoggedIn && <GlobalSearch />}
+
                 {isLoggedIn ? (
                     <>
                         {/* Tombol Ikon Profil */}
@@ -101,7 +107,6 @@ const Navbar = () => {
                                 {role !== 'ROLE_ADMIN' && (
                                     <div className="px-4 py-3 border-b border-gray-800/80 mb-1 bg-white/5">
                                         <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2">Showcase</p>
-
                                         {pinnedAchievements.length === 0 ? (
                                             <p className="text-xs text-gray-500 italic">Belum ada achievement yang dipin.</p>
                                         ) : (
@@ -130,7 +135,6 @@ const Navbar = () => {
                                         Dashboard Admin
                                     </Link>
                                 )}
-
                                 <Link
                                     to="/profile"
                                     onClick={() => setIsDropdownOpen(false)}
@@ -149,7 +153,6 @@ const Navbar = () => {
                                         <span>Achievement Saya</span>
                                     </Link>
                                 )}
-
                                 {role !== 'ROLE_ADMIN' && (
                                     <Link
                                         to="/missions"
@@ -184,6 +187,6 @@ const Navbar = () => {
             </div>
         </nav>
     );
-}
+};
 
 export default Navbar;

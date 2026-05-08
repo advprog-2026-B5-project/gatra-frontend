@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import MilestoneNotification from "../components/MilestoneNotification";
+import NotificationToast from "../components/NotificationToast";
 
 const QuizPage = () => {
     const { id: articleId } = useParams();
@@ -17,6 +18,9 @@ const QuizPage = () => {
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
     const [direction, setDirection] = useState(1);
+
+    // NEW: Notification state
+    const [notification, setNotification] = useState(null);
 
     useEffect(() => {
         fetchQuestions();
@@ -83,6 +87,15 @@ const QuizPage = () => {
             if (!res.ok) throw new Error("Gagal submit kuis");
             const data = await res.json();
             setResult(data);
+
+            // NEW: Trigger notification if passed and earned points
+            if (data.passed && data.pointsEarned > 0) {
+                setNotification({
+                    message: "Kuis Berhasil Diselesaikan!",
+                    points: data.pointsEarned
+                });
+            }
+
         } catch (err) {
             setError(err.message);
         } finally {
@@ -146,101 +159,110 @@ const QuizPage = () => {
 
     // ── Result screen ──
     if (result) {
-    const passed = result.passed;
-    const score = Math.round(result.score);
-    const passing = Math.round(result.passingScore);
+        const passed = result.passed;
+        const score = Math.round(result.score);
+        const passing = Math.round(result.passingScore);
 
-    return (
-        <>
-            <MilestoneNotification 
-                unlockedAchievements={result.milestoneResponse?.newlyUnlockedAchievements || []} 
-                completedMissions={result.milestoneResponse?.completedMissions || []}
-            />
+        return (
+            <>
+                <MilestoneNotification
+                    unlockedAchievements={result.milestoneResponse?.newlyUnlockedAchievements || []}
+                    completedMissions={result.milestoneResponse?.completedMissions || []}
+                />
 
-            <div className="min-h-screen bg-[#0B0F1E] flex items-center justify-center px-6 py-16">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 24 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="w-full max-w-md flex flex-col items-center gap-6"
-                >
-                    <div className="text-center flex flex-col gap-1">
-                        <h2 className="text-2xl font-bold text-white">
-                            {passed ? "Selamat, kamu lulus!" : "Belum lulus"}
-                        </h2>
-                        <p className="text-gray-400 text-sm">
-                            {passed
-                                ? "Kamu berhasil memahami isi bacaan ini."
-                                : "Coba baca artikelnya lagi dan ulangi kuis ini."}
-                        </p>
-                    </div>
+                {/* NEW: Render Toast Notification */}
+                {notification && (
+                    <NotificationToast
+                        message={notification.message}
+                        points={notification.points}
+                        onClose={() => setNotification(null)}
+                    />
+                )}
 
-                    <div className="w-full bg-[#111A3B] rounded-2xl p-6 flex flex-col gap-4">
-                        <div className="flex items-end justify-between">
-                            <div>
-                                <p className="text-xs text-gray-500 mb-1">Nilai kamu</p>
-                                <p className={`text-5xl font-bold ${passed ? "text-green-400" : "text-red-400"}`}>
-                                    {score}
-                                </p>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-xs text-gray-500 mb-1">Nilai minimum</p>
-                                <p className="text-2xl font-semibold text-gray-400">{passing}</p>
-                            </div>
+                <div className="min-h-screen bg-[#0B0F1E] flex items-center justify-center px-6 py-16 relative overflow-hidden">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 24 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="w-full max-w-md flex flex-col items-center gap-6 z-10"
+                    >
+                        <div className="text-center flex flex-col gap-1">
+                            <h2 className="text-2xl font-bold text-white">
+                                {passed ? "Selamat, kamu lulus!" : "Belum lulus"}
+                            </h2>
+                            <p className="text-gray-400 text-sm">
+                                {passed
+                                    ? "Kamu berhasil memahami isi bacaan ini."
+                                    : "Coba baca artikelnya lagi dan ulangi kuis ini."}
+                            </p>
                         </div>
 
-                        <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
-                            <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: `${Math.min(score, 100)}%` }}
-                                transition={{ duration: 0.8, delay: 0.3 }}
-                                className={`h-full rounded-full ${passed ? "bg-green-500" : "bg-red-500"}`}
-                            />
+                        <div className="w-full bg-[#111A3B] rounded-2xl p-6 flex flex-col gap-4">
+                            <div className="flex items-end justify-between">
+                                <div>
+                                    <p className="text-xs text-gray-500 mb-1">Nilai kamu</p>
+                                    <p className={`text-5xl font-bold ${passed ? "text-green-400" : "text-red-400"}`}>
+                                        {score}
+                                    </p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-xs text-gray-500 mb-1">Nilai minimum</p>
+                                    <p className="text-2xl font-semibold text-gray-400">{passing}</p>
+                                </div>
+                            </div>
+
+                            <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${Math.min(score, 100)}%` }}
+                                    transition={{ duration: 0.8, delay: 0.3 }}
+                                    className={`h-full rounded-full ${passed ? "bg-green-500" : "bg-red-500"}`}
+                                />
+                            </div>
+
+                            <p className="text-xs text-gray-500 text-center">
+                                {passed
+                                    ? `Kamu melampaui nilai minimum sebesar ${score - passing} poin`
+                                    : `Kurang ${passing - score} poin lagi untuk lulus`}
+                            </p>
                         </div>
 
-                        <p className="text-xs text-gray-500 text-center">
-                            {passed
-                                ? `Kamu melampaui nilai minimum sebesar ${score - passing} poin`
-                                : `Kurang ${passing - score} poin lagi untuk lulus`}
-                        </p>
-                    </div>
+                        <div className="w-full flex flex-col gap-2">
+                            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Rincian jawaban</p>
+                            {result.answers.map((a, i) => (
+                                <div
+                                    key={a.questionId ?? i}
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                                        ${a.isCorrect ? "bg-green-500/10 text-green-300" : "bg-red-500/10 text-red-300"}`}
+                                >
+                                    <span className="text-base">{a.isCorrect ? "✓" : "✗"}</span>
+                                    <span className="flex-1 text-gray-300">Soal {i + 1}</span>
+                                    <span className="text-xs opacity-70">
+                                        Jawaban: {a.userAnswer}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
 
-                    <div className="w-full flex flex-col gap-2">
-                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Rincian jawaban</p>
-                        {result.answers.map((a, i) => (
-                            <div
-                                key={a.questionId ?? i}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm
-                                    ${a.isCorrect ? "bg-green-500/10 text-green-300" : "bg-red-500/10 text-red-300"}`}
+                        <div className="w-full flex flex-col gap-3 pt-2">
+                            <button
+                                onClick={fetchQuestions}
+                                className="w-full py-3 rounded-xl font-medium text-sm border border-white/10 text-gray-300 hover:bg-white/5 hover:text-white transition"
                             >
-                                <span className="text-base">{a.isCorrect ? "✓" : "✗"}</span>
-                                <span className="flex-1 text-gray-300">Soal {i + 1}</span>
-                                <span className="text-xs opacity-70">
-                                    Jawaban: {a.userAnswer}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="w-full flex flex-col gap-3 pt-2">
-                        <button
-                            onClick={fetchQuestions}
-                            className="w-full py-3 rounded-xl font-medium text-sm border border-white/10 text-gray-300 hover:bg-white/5 hover:text-white transition"
-                        >
-                            Ulangi Kuis
-                        </button>
-                        <button
-                            onClick={() => navigate("/listBacaan")}
-                            className="w-full py-3 rounded-xl font-medium text-sm bg-blue-600 hover:bg-blue-700 text-white transition"
-                        >
-                            Kembali ke Daftar Bacaan
-                        </button>
-                    </div>
-                </motion.div>
-            </div>
-        </>
-    );
-}
+                                Ulangi Kuis
+                            </button>
+                            <button
+                                onClick={() => navigate("/listBacaan")}
+                                className="w-full py-3 rounded-xl font-medium text-sm bg-blue-600 hover:bg-blue-700 text-white transition"
+                            >
+                                Kembali ke Daftar Bacaan
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            </>
+        );
+    }
 
     // ── Quiz screen ──
     return (
