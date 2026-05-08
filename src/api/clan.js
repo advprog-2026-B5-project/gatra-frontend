@@ -115,3 +115,19 @@ export const getLeaderboardByTier = async (tier) => {
     if (!response.ok) throw new Error(`Gagal mengambil leaderboard tier ${tier}`);
     return response.json();
 };
+
+// season
+export const endSeason = async (token) => {
+    const response = await fetch(`${BASE_URL}/season/end`, {
+        method: 'POST',
+        headers: getAuthHeaders(token)
+    });
+    if (!response.ok) throw new Error('Gagal mengakhiri musim');
+    return response.json();
+};
+
+export const getLastSeason = async () => {
+    const response = await fetch(`${BASE_URL}/season/last`);
+    if (!response.ok) throw new Error('Gagal mengambil data season terakhir');
+    return response.json();
+};

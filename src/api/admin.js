@@ -9,3 +9,13 @@ export const triggerSeasonReset = async (token) => {
         }
     });
 };
+
+export const endSeasonFull = async (token) => {
+    const snapshotRes = await axios.post(`${API_URL}/clans/season/end`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+
+    await triggerSeasonReset(token);
+
+    return snapshotRes.data;
+};

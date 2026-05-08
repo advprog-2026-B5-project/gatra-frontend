@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DailyMissionManager from '../components/DailyMissionManager';
 import AchievementManager from '../components/AchievementManager';
-import { triggerSeasonReset } from '../api/admin'; // Tambahan import untuk reset season
+import { triggerSeasonReset } from '../api/admin';
+import { endSeasonFull } from '../api/admin';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -894,7 +895,7 @@ const AdminDashboard = () => {
                                     onClick={async () => {
                                         setIsResetting(true);
                                         try {
-                                            const res = await triggerSeasonReset(token);
+                                            const res = await endSeasonFull(token);
                                             alert(res.data?.message || "Season berhasil direset! Semua skor kembali ke 0.");
                                             setIsResetModalOpen(false);
                                             // Opsional: refresh table

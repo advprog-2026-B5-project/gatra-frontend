@@ -12,6 +12,7 @@ import {
     kickMember,
     leaveClan,
     getAllTierLeaderboards,
+    getLastSeason,
 } from '../api/clan';
 
 function Spinner() {
@@ -609,99 +610,180 @@ const TIER_COLORS = {
 
 const RANK_MEDALS = { 1: '🥇', 2: '🥈', 3: '🥉' };
 
+function TierRankingList({ leaderboards, activeTier, emptyMessage }) {
+    const currentTierData = leaderboards.find((lb) => lb.tier === activeTier);
+    return (
+        <div className="bg-[#131627] border border-gray-800 rounded-3xl p-6">
+            <h3 className={`text-sm font-bold uppercase tracking-wider mb-4 ${TIER_COLORS[activeTier].text}`}>
+                {TIER_COLORS[activeTier].badge} Tier {activeTier}
+            </h3>
+            {!currentTierData || currentTierData.rankings.length === 0 ? (
+                <div className="text-center py-10">
+                    <p className="text-gray-500 text-sm">{emptyMessage}</p>
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {currentTierData.rankings.map((entry) => (
+                        <div
+                            key={entry.clanId}
+                            className={`flex items-center gap-4 p-4 rounded-2xl border ${
+                                entry.rank <= 3
+                                    ? `${TIER_COLORS[activeTier].bg} ${TIER_COLORS[activeTier].border}`
+                                    : 'bg-white/5 border-gray-800'
+                            }`}
+                        >
+                            <div className="w-8 text-center shrink-0">
+                                {RANK_MEDALS[entry.rank] ? (
+                                    <span className="text-xl">{RANK_MEDALS[entry.rank]}</span>
+                                ) : (
+                                    <span className="text-sm font-bold text-gray-500">#{entry.rank}</span>
+                                )}
+                            </div>
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600/40 to-purple-500/30 border border-white/10 flex items-center justify-center text-sm font-black text-white shrink-0">
+                                {entry.clanName.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="font-bold text-white truncate">{entry.clanName}</p>
+                                <p className="text-xs text-gray-500">Tier {entry.tier}</p>
+                            </div>
+                            <div className="shrink-0 text-right">
+                                <p className={`text-sm font-bold ${TIER_COLORS[activeTier].text}`}>
+                                    {entry.score.toFixed(1)}
+                                </p>
+                                <p className="text-[10px] text-gray-600 uppercase tracking-wider">poin</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
 function LeaderboardTab() {
     const [leaderboards, setLeaderboards] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [loadingCurrent, setLoadingCurrent] = useState(true);
+    const [errorCurrent, setErrorCurrent] = useState('');
+
+    const [lastSeason, setLastSeason] = useState(null);
+    const [loadingLast, setLoadingLast] = useState(false);
+    const [errorLast, setErrorLast] = useState('');
+    const [lastSeasonFetched, setLastSeasonFetched] = useState(false);
+
     const [activeTier, setActiveTier] = useState('BRONZE');
+    const [activeView, setActiveView] = useState('current');
 
     useEffect(() => {
         getAllTierLeaderboards()
             .then(setLeaderboards)
-            .catch((err) => setError(err.message))
-            .finally(() => setLoading(false));
+            .catch((err) => setErrorCurrent(err.message))
+            .finally(() => setLoadingCurrent(false));
     }, []);
 
-    if (loading) return <Spinner />;
-    if (error) return <Feedback type="error" message={error} />;
+    const handleViewLastSeason = () => {
+        setActiveView('last');
+        if (!lastSeasonFetched) {
+            setLoadingLast(true);
+            setErrorLast('');
+            getLastSeason()
+                .then(setLastSeason)
+                .catch((err) => setErrorLast(err.message))
+                .finally(() => { setLoadingLast(false); setLastSeasonFetched(true); });
+        }
+    };
 
-    const currentTierData = leaderboards.find((lb) => lb.tier === activeTier);
+    const tierSelector = (
+        <div className="flex gap-1 bg-white/5 border border-gray-800 rounded-2xl p-1 w-fit">
+            {Object.keys(TIER_COLORS).map((tier) => {
+                const colors = TIER_COLORS[tier];
+                return (
+                    <button
+                        key={tier}
+                        onClick={() => setActiveTier(tier)}
+                        className={`text-sm font-bold px-4 py-2 rounded-xl transition ${
+                            activeTier === tier
+                                ? `${colors.bg} ${colors.text} border ${colors.border}`
+                                : 'text-gray-400 hover:text-white'
+                        }`}
+                    >
+                        {colors.badge} {tier}
+                    </button>
+                );
+            })}
+        </div>
+    );
 
     return (
         <div className="space-y-4">
-            {/* Tier selector */}
+            {/* View switcher: Musim Ini / Season Lalu */}
             <div className="flex gap-1 bg-white/5 border border-gray-800 rounded-2xl p-1 w-fit">
-                {Object.keys(TIER_COLORS).map((tier) => {
-                    const colors = TIER_COLORS[tier];
-                    return (
-                        <button
-                            key={tier}
-                            onClick={() => setActiveTier(tier)}
-                            className={`text-sm font-bold px-4 py-2 rounded-xl transition ${
-                                activeTier === tier
-                                    ? `${colors.bg} ${colors.text} border ${colors.border}`
-                                    : 'text-gray-400 hover:text-white'
-                            }`}
-                        >
-                            {colors.badge} {tier}
-                        </button>
-                    );
-                })}
+                <button
+                    onClick={() => setActiveView('current')}
+                    className={`text-sm font-bold px-5 py-2 rounded-xl transition ${
+                        activeView === 'current'
+                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
+                            : 'text-gray-400 hover:text-white'
+                    }`}
+                >
+                    🏆 Musim Ini
+                </button>
+                <button
+                    onClick={handleViewLastSeason}
+                    className={`text-sm font-bold px-5 py-2 rounded-xl transition ${
+                        activeView === 'last'
+                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
+                            : 'text-gray-400 hover:text-white'
+                    }`}
+                >
+                    📜 Season Lalu
+                </button>
             </div>
 
-            {/* Rankings */}
-            <div className="bg-[#131627] border border-gray-800 rounded-3xl p-6">
-                <h3 className={`text-sm font-bold uppercase tracking-wider mb-4 ${TIER_COLORS[activeTier].text}`}>
-                    {TIER_COLORS[activeTier].badge} Tier {activeTier}
-                </h3>
+            {activeView === 'current' && (
+                <>
+                    {tierSelector}
+                    {loadingCurrent ? <Spinner /> : errorCurrent ? <Feedback type="error" message={errorCurrent} /> : (
+                        <TierRankingList
+                            leaderboards={leaderboards}
+                            activeTier={activeTier}
+                            emptyMessage="Belum ada clan di tier ini."
+                        />
+                    )}
+                </>
+            )}
 
-                {!currentTierData || currentTierData.rankings.length === 0 ? (
-                    <div className="text-center py-10">
-                        <p className="text-gray-500 text-sm">Belum ada clan di tier ini.</p>
-                    </div>
-                ) : (
-                    <div className="space-y-3">
-                        {currentTierData.rankings.map((entry) => (
-                            <div
-                                key={entry.clanId}
-                                className={`flex items-center gap-4 p-4 rounded-2xl border ${
-                                    entry.rank <= 3
-                                        ? `${TIER_COLORS[activeTier].bg} ${TIER_COLORS[activeTier].border}`
-                                        : 'bg-white/5 border-gray-800'
-                                }`}
-                            >
-                                {/* Rank */}
-                                <div className="w-8 text-center shrink-0">
-                                    {RANK_MEDALS[entry.rank] ? (
-                                        <span className="text-xl">{RANK_MEDALS[entry.rank]}</span>
-                                    ) : (
-                                        <span className="text-sm font-bold text-gray-500">#{entry.rank}</span>
-                                    )}
-                                </div>
-
-                                {/* Avatar */}
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600/40 to-purple-500/30 border border-white/10 flex items-center justify-center text-sm font-black text-white shrink-0">
-                                    {entry.clanName.charAt(0).toUpperCase()}
-                                </div>
-
-                                {/* Clan name */}
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-bold text-white truncate">{entry.clanName}</p>
-                                    <p className="text-xs text-gray-500">Tier {entry.tier}</p>
-                                </div>
-
-                                {/* Score */}
-                                <div className="shrink-0 text-right">
-                                    <p className={`text-sm font-bold ${TIER_COLORS[activeTier].text}`}>
-                                        {entry.score.toFixed(1)}
-                                    </p>
-                                    <p className="text-[10px] text-gray-600 uppercase tracking-wider">poin</p>
-                                </div>
+            {activeView === 'last' && (
+                <>
+                    {loadingLast ? (
+                        <Spinner />
+                    ) : errorLast ? (
+                        <div className="bg-[#131627] border border-gray-800 rounded-3xl p-10 text-center">
+                            <div className="text-4xl mb-3">📭</div>
+                            <p className="text-gray-400 font-bold">Belum ada season yang selesai.</p>
+                            <p className="text-gray-500 text-sm mt-1">Data season lalu akan muncul setelah admin mengakhiri musim pertama.</p>
+                        </div>
+                    ) : lastSeason ? (
+                        <>
+                            <div className="flex items-center gap-3 px-1">
+                                <span className="text-xs text-gray-500 uppercase tracking-wider font-bold">
+                                    Season #{lastSeason.seasonNumber}
+                                </span>
+                                {lastSeason.frozenAt && (
+                                    <span className="text-xs text-gray-600">
+                                        · Diakhiri {new Date(lastSeason.frozenAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                    </span>
+                                )}
                             </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+                            {tierSelector}
+                            <TierRankingList
+                                leaderboards={lastSeason.leaderboards ?? []}
+                                activeTier={activeTier}
+                                emptyMessage="Belum ada clan di tier ini di season sebelumnya."
+                            />
+                        </>
+                    ) : null}
+                </>
+            )}
         </div>
     );
 }
