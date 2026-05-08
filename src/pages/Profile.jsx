@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import MilestoneNotification from '../components/MilestoneNotification';
+import useNewAchievementChecker from '../hooks/useNewAchievementChecker';
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -11,6 +13,8 @@ const Profile = () => {
 
     const userId = localStorage.getItem('userId');
     const token = localStorage.getItem('token');
+    const { newAchievements } = useNewAchievementChecker();
+
     const [achievements, setAchievements] = useState([]);
 
     useEffect(() => {
@@ -131,6 +135,8 @@ const Profile = () => {
     if (error) return <div className="flex-1 flex items-center justify-center text-red-400">{error}</div>;
 
     return (
+        <>
+        <MilestoneNotification unlockedAchievements={newAchievements} completedMissions={[]} />
         <div className="flex-1 w-full relative overflow-hidden flex flex-col items-center justify-center p-4 pb-20 pt-10">
             {/* Background Glow Effect */}
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-200 h-100 bg-purple-600/20 blur-[120px] rounded-t-full pointer-events-none"></div>
@@ -282,6 +288,7 @@ const Profile = () => {
                 Keluar dari Akun (Logout)
             </button>
         </div>
+        </>
     );
 };
 
