@@ -1,11 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { getMyAchievements } from '../api/achievement';
+import MilestoneNotification from '../components/MilestoneNotification';
+import useNewAchievementChecker from '../hooks/useNewAchievementChecker';
 
 const AchievementInventory = () => {
     const [myAchievements, setMyAchievements] = useState([]);
     const [loading, setLoading] = useState(true);
     const token = localStorage.getItem('token');
+    const { newAchievements } = useNewAchievementChecker();
 
     useEffect(() => {
         const fetchMyData = async () => {
@@ -71,6 +74,8 @@ const AchievementInventory = () => {
     };
 
     return (
+        <>
+        <MilestoneNotification unlockedAchievements={newAchievements} completedMissions={[]} />
         <div className="min-h-screen bg-[#0B0D1A] p-8 text-white">
             <div className="max-w-5xl mx-auto">
                 <header className="mb-10 animate-fade-in">
@@ -149,6 +154,7 @@ const AchievementInventory = () => {
                 )}
             </div>
         </div>
+        </>
     );
 
 };
