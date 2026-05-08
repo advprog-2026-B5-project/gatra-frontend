@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DailyMissionManager from '../components/DailyMissionManager';
 import AchievementManager from '../components/AchievementManager';
-import { triggerSeasonReset } from '../api/admin';
+// import { triggerSeasonReset } from '../api/admin';
 import { endSeasonFull } from '../api/admin';
 
 const AdminDashboard = () => {
