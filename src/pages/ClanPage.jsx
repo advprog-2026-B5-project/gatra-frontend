@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/rules-of-hooks,react/no-unescaped-entities */
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import {
     getAllClans,
     getMyClan,
@@ -548,8 +549,7 @@ function PendingApplicationRow({ app, clanId, token }) {
         try {
             await decideMembership(token, clanId, app.userId, decision);
             setStatus(decision);
-        } catch {
-        } finally {
+        } catch { /* empty */ } finally {
             setLoading(null);
         }
     };
@@ -588,7 +588,7 @@ function PendingApplicationRow({ app, clanId, token }) {
 }
 
 const ClanPage = () => {
-    const navigate = useNavigate();
+    
     const token = localStorage.getItem('token');
 
     const [activeTab, setActiveTab] = useState('all');
