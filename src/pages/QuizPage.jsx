@@ -247,9 +247,15 @@ const QuizPage = () => {
                         <div className="w-full flex flex-col gap-3 pt-2">
                             <button
                                 onClick={fetchQuestions}
-                                className="w-full py-3 rounded-xl font-medium text-sm border border-white/10 text-gray-300 hover:bg-white/5 hover:text-white transition"
+                                disabled={passed}
+                                title={passed ? "Kamu sudah lulus kuis ini" : undefined}
+                                className={`w-full py-3 rounded-xl font-medium text-sm border transition
+                                    ${passed
+                                    ? "border-white/5 text-gray-600 cursor-not-allowed bg-white/3"
+                                    : "border-white/10 text-gray-300 hover:bg-white/5 hover:text-white"
+                                }`}
                             >
-                                Ulangi Kuis
+                                {passed ? "Kuis Sudah Diselesaikan ✓" : "Ulangi Kuis"}
                             </button>
                             <button
                                 onClick={() => navigate("/listBacaan")}
