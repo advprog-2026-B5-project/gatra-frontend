@@ -128,7 +128,7 @@ const Navbar = () => {
                                 {/* --- Menu Navigasi Normal --- */}
                                 {role === 'ROLE_ADMIN' && (
                                     <Link
-                                        to="/admin"
+                                        to="/admin/dashboard"
                                         onClick={() => setIsDropdownOpen(false)}
                                         className="block px-4 py-2.5 text-sm text-gray-300 hover:bg-[#1E2235] hover:text-white transition"
                                     >
