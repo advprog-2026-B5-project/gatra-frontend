@@ -56,7 +56,7 @@ const MilestoneNotification = ({ unlockedAchievements, completedMissions }) => {
                                     🏆
                                 </div>
                             )}
-                            <motion.div 
+                            <motion.div
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
                                 transition={{ delay: 0.4, type: "spring" }}
@@ -91,7 +91,7 @@ const MilestoneNotification = ({ unlockedAchievements, completedMissions }) => {
                             <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center text-2xl shadow-[0_0_15px_rgba(52,211,153,0.5)] border-2 border-emerald-200">
                                 ✅
                             </div>
-                            <motion.div 
+                            <motion.div
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
                                 transition={{ delay: 0.4, type: "spring" }}

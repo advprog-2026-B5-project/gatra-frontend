@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import MilestoneNotification from "../components/MilestoneNotification";
-import NotificationToast from "../components/NotificationToast";
 
 const QuizPage = () => {
     const { id: articleId } = useParams();
@@ -18,9 +17,6 @@ const QuizPage = () => {
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
     const [direction, setDirection] = useState(1);
-
-    // NEW: Notification state
-    const [notification, setNotification] = useState(null);
 
     useEffect(() => {
         fetchQuestions();
@@ -87,15 +83,6 @@ const QuizPage = () => {
             if (!res.ok) throw new Error("Gagal submit kuis");
             const data = await res.json();
             setResult(data);
-
-            // NEW: Trigger notification if passed and earned points
-            if (data.passed && data.pointsEarned > 0) {
-                setNotification({
-                    message: "Kuis Berhasil Diselesaikan!",
-                    points: data.pointsEarned
-                });
-            }
-
         } catch (err) {
             setError(err.message);
         } finally {
@@ -170,21 +157,12 @@ const QuizPage = () => {
                     completedMissions={result.milestoneResponse?.completedMissions || []}
                 />
 
-                {/* NEW: Render Toast Notification */}
-                {notification && (
-                    <NotificationToast
-                        message={notification.message}
-                        points={notification.points}
-                        onClose={() => setNotification(null)}
-                    />
-                )}
-
-                <div className="min-h-screen bg-[#0B0F1E] flex items-center justify-center px-6 py-16 relative overflow-hidden">
+                <div className="min-h-screen bg-[#0B0F1E] flex items-center justify-center px-6 py-16">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: 24 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
-                        className="w-full max-w-md flex flex-col items-center gap-6 z-10"
+                        className="w-full max-w-md flex flex-col items-center gap-6"
                     >
                         <div className="text-center flex flex-col gap-1">
                             <h2 className="text-2xl font-bold text-white">
@@ -233,7 +211,7 @@ const QuizPage = () => {
                                 <div
                                     key={a.questionId ?? i}
                                     className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm
-                                        ${a.isCorrect ? "bg-green-500/10 text-green-300" : "bg-red-500/10 text-red-300"}`}
+                                    ${a.isCorrect ? "bg-green-500/10 text-green-300" : "bg-red-500/10 text-red-300"}`}
                                 >
                                     <span className="text-base">{a.isCorrect ? "✓" : "✗"}</span>
                                     <span className="flex-1 text-gray-300">Soal {i + 1}</span>
@@ -305,11 +283,11 @@ const QuizPage = () => {
                         onClick={() => { setDirection(i > current ? 1 : -1); setCurrent(i); }}
                         className={`w-8 h-8 rounded-lg text-xs font-medium transition
                             ${i === current
-                            ? "bg-blue-600 text-white"
-                            : answers[q.id]
-                                ? "bg-blue-600/20 text-blue-400 border border-blue-600/30"
-                                : "bg-white/5 text-gray-500 border border-white/10 hover:border-white/20"
-                        }`}
+                                ? "bg-blue-600 text-white"
+                                : answers[q.id]
+                                    ? "bg-blue-600/20 text-blue-400 border border-blue-600/30"
+                                    : "bg-white/5 text-gray-500 border border-white/10 hover:border-white/20"
+                            }`}
                     >
                         {i + 1}
                     </button>
@@ -350,9 +328,9 @@ const QuizPage = () => {
                                             onClick={() => handleAnswer(q.id, val)}
                                             className={`flex items-center gap-4 px-5 py-4 rounded-xl border text-sm font-medium transition-all
                                                 ${selected
-                                                ? "bg-blue-600/20 border-blue-500 text-white"
-                                                : "bg-white/3 border-white/10 text-gray-300 hover:border-white/25 hover:bg-white/5"
-                                            }`}
+                                                    ? "bg-blue-600/20 border-blue-500 text-white"
+                                                    : "bg-white/3 border-white/10 text-gray-300 hover:border-white/25 hover:bg-white/5"
+                                                }`}
                                         >
                                             <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0
                                                 ${selected ? "border-blue-400 bg-blue-500" : "border-gray-600"}`}>
@@ -373,9 +351,9 @@ const QuizPage = () => {
                                             onClick={() => handleAnswer(q.id, opt)}
                                             className={`flex items-center gap-4 px-5 py-4 rounded-xl border text-sm text-left transition-all
                                                 ${selected
-                                                ? "bg-blue-600/20 border-blue-500 text-white"
-                                                : "bg-white/3 border-white/10 text-gray-300 hover:border-white/25 hover:bg-white/5"
-                                            }`}
+                                                    ? "bg-blue-600/20 border-blue-500 text-white"
+                                                    : "bg-white/3 border-white/10 text-gray-300 hover:border-white/25 hover:bg-white/5"
+                                                }`}
                                         >
                                             <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0
                                                 ${selected ? "bg-blue-500 text-white" : "bg-white/10 text-gray-400"}`}>
@@ -422,9 +400,9 @@ const QuizPage = () => {
                         disabled={!allAnswered || isSubmitting}
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition
                             ${allAnswered
-                            ? "bg-green-600 hover:bg-green-700 text-white"
-                            : "bg-white/5 text-gray-500 cursor-not-allowed"
-                        }`}
+                                ? "bg-green-600 hover:bg-green-700 text-white"
+                                : "bg-white/5 text-gray-500 cursor-not-allowed"
+                            }`}
                     >
                         {isSubmitting ? (
                             <>

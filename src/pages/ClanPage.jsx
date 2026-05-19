@@ -1,7 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks,react/no-unescaped-entities */
 import React, { useState, useEffect } from 'react';
-import MilestoneNotification from '../components/MilestoneNotification';
-import useNewAchievementChecker from '../hooks/useNewAchievementChecker';
 
 import {
     getAllClans,
@@ -782,7 +780,7 @@ function LeaderboardTab() {
 const ClanPage = () => {
     
     const token = localStorage.getItem('token');
-    const { newAchievements } = useNewAchievementChecker();
+
 
     const [activeTab, setActiveTab] = useState('all');
     const [myClan, setMyClan] = useState(null);
@@ -835,7 +833,6 @@ const ClanPage = () => {
 
     return (
         <>
-        <MilestoneNotification unlockedAchievements={newAchievements} completedMissions={[]} />
         <div className="min-h-screen bg-[#0B0D1A] p-6 md:p-8 text-white">
             <div className="max-w-4xl mx-auto">
                 <header className="mb-8 flex items-start justify-between gap-4">
